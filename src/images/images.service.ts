@@ -13,6 +13,7 @@ import { ImageGenerateDto } from './dto/image-generate.dto';
 import { MidjourneyActionDto } from './dto/midjourney-action.dto';
 import { MidjourneyModalDto } from './dto/midjourney-modal.dto';
 import { MidjourneyEditsDto } from './dto/midjourney-edits.dto';
+import { RetryImageTaskDto } from './dto/retry-image-task.dto';
 import { parseSqliteJson, toSqliteJson } from '../common/utils/sqlite-json.util';
 import { ProjectsService } from '../projects/projects.service';
 import { randomUrlId } from '../common/utils/random-id.util';
@@ -48,6 +49,54 @@ export class ImagesService {
     });
     if (!project) throw new BadRequestException('Project not found');
     return project.id;
+  }
+
+  private asJsonRecord(value: unknown): Record<string, unknown> {
+    const parsed = parseSqliteJson(value);
+    return parsed && typeof parsed === 'object' && !Array.isArray(parsed)
+      ? parsed as Record<string, unknown>
+      : {};
+  }
+
+  private parseModelId(value: string, message = 'Invalid modelId') {
+    try {
+      return BigInt(value);
+    } catch {
+      throw new BadRequestException(message);
+    }
+  }
+
+  private async resolveRunnableImageModel(tx: Prisma.TransactionClient, modelId: bigint) {
+    const model = await tx.aiModel.findUnique({
+      where: { id: modelId },
+      include: { channel: true },
+    });
+    if (!model) throw new NotFoundException('Model not found');
+    if (!model.isActive) throw new BadRequestException('Model disabled');
+    if (model.type !== AiModelType.image) throw new BadRequestException('Model is not image type');
+    if (!isFixedMediaModelId(model.id)) {
+      throw new BadRequestException('个人版只支持内置固定图片模型');
+    }
+    if (
+      model.channel.status !== ApiChannelStatus.active ||
+      !model.channel.baseUrl.trim() ||
+      !model.channel.apiKey
+    ) {
+      throw new BadRequestException(`请先配置 ${model.channel.name} 渠道的 Base URL 和 API Key`);
+    }
+    return model;
+  }
+
+  private resolveRetryParameters(task: ImageTask, targetModelId: bigint, dto?: RetryImageTaskDto) {
+    if (dto && Object.prototype.hasOwnProperty.call(dto, 'parameters')) {
+      return this.asJsonRecord(dto.parameters);
+    }
+
+    if (targetModelId === task.modelId) {
+      return this.asJsonRecord(task.parameters);
+    }
+
+    return {};
   }
 
   private async findOwnedTaskByIdOrTaskNo(userId: bigint, idOrTaskNo: string) {
@@ -210,7 +259,7 @@ export class ImagesService {
     return { ok: true };
   }
 
-  async retry(userId: bigint, id: bigint) {
+  async retry(userId: bigint, id: bigint, dto?: RetryImageTaskDto) {
     const updated = await this.prisma.$transaction(async (tx) => {
       const user = await tx.user.findUnique({ where: { id: userId }, select: { status: true } });
       if (!user) throw new NotFoundException('User not found');
@@ -222,15 +271,54 @@ export class ImagesService {
         throw new BadRequestException('Task is still running');
       }
 
+      const targetModelId = dto?.modelId ? this.parseModelId(dto.modelId) : ownedTask.modelId;
+      const model = await this.resolveRunnableImageModel(tx, targetModelId);
+      const nextParameters = this.resolveRetryParameters(ownedTask, targetModelId, dto);
+      const mergedParams: ImageGenerateParams = {
+        ...(parseSqliteJson<Record<string, unknown>>(model.defaultParams) ?? {}),
+        ...nextParameters,
+        prompt: ownedTask.prompt,
+        negativePrompt: ownedTask.negativePrompt ?? undefined,
+      };
+      if (model.modelKey && !(mergedParams as any).model) (mergedParams as any).model = model.modelKey;
+
+      const adapter = AdapterFactory.createImageAdapter(model.provider, model.channel as any);
+      const validation = adapter.validateParams(mergedParams);
+      if (!validation.valid) {
+        throw new BadRequestException(validation.errors?.join(', ') ?? 'Invalid params');
+      }
+
+      if (ownedTask.status === TaskStatus.completed) {
+        return tx.imageTask.create({
+          data: {
+            userId,
+            modelId: model.id,
+            channelId: model.channelId,
+            ...(ownedTask.projectId ? { projectId: ownedTask.projectId } : {}),
+            taskNo: `img_${randomUrlId(24)}`,
+            provider: model.provider,
+            prompt: ownedTask.prompt,
+            negativePrompt: ownedTask.negativePrompt,
+            parameters: toSqliteJson(nextParameters),
+            status: TaskStatus.pending,
+          },
+        });
+      }
+
       return tx.imageTask.update({
         where: { id: ownedTask.id },
         data: {
+          modelId: model.id,
+          channelId: model.channelId,
+          provider: model.provider,
+          parameters: toSqliteJson(nextParameters),
           status: TaskStatus.pending,
           retryCount: { increment: 1 },
           errorMessage: null,
           startedAt: null,
           completedAt: null,
           providerTaskId: null,
+          providerData: null,
           resultUrl: null,
           thumbnailUrl: null,
           storageKey: null,

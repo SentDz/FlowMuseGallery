@@ -51,6 +51,11 @@ export interface GenerateImageDto {
   skipProjectPromptTransform?: boolean
 }
 
+export interface RetryImageTaskDto {
+  modelId?: string
+  parameters?: Record<string, unknown>
+}
+
 // Midjourney 操作请求 DTO
 export interface MidjourneyActionDto {
   customId: string

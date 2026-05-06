@@ -7,6 +7,7 @@ import { ImageGenerateDto } from './dto/image-generate.dto';
 import { MidjourneyActionDto } from './dto/midjourney-action.dto';
 import { MidjourneyModalDto } from './dto/midjourney-modal.dto';
 import { MidjourneyEditsDto } from './dto/midjourney-edits.dto';
+import { RetryImageTaskDto } from './dto/retry-image-task.dto';
 import { ImagesService } from './images.service';
 
 @UseGuards(JwtAuthGuard)
@@ -35,8 +36,8 @@ export class ImagesController {
   }
 
   @Post('tasks/:id/retry')
-  retry(@CurrentUser('id') userId: bigint, @Param('id') id: string) {
-    return this.imagesService.retry(userId, BigInt(id));
+  retry(@CurrentUser('id') userId: bigint, @Param('id') id: string, @Body() dto: RetryImageTaskDto) {
+    return this.imagesService.retry(userId, BigInt(id), dto);
   }
 
   @Post('tasks/:id/midjourney/action')

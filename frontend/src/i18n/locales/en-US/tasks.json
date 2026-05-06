@@ -45,6 +45,17 @@
     "download": "Download",
     "share": "Share"
   },
+  "retryModal": {
+    "title": "Retry Image Task",
+    "model": "Model",
+    "loadingModels": "Loading models...",
+    "defaultParams": "Using the target model defaults",
+    "reference": "reference",
+    "references": "references",
+    "cancel": "Cancel",
+    "submit": "Retry",
+    "submitting": "Submitting..."
+  },
   "midjourney": {
     "actions": "Actions",
     "submitting": "Submitting...",
@@ -121,6 +132,7 @@
   },
   "errors": {
     "load": "Failed to load tasks",
+    "loadModels": "Failed to load image models",
     "delete": "Failed to delete task",
     "cancel": "Failed to cancel task",
     "retry": "Failed to retry task",

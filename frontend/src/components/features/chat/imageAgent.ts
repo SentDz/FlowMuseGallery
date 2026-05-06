@@ -873,7 +873,7 @@ export function buildImageAgentTaskDraft(params: {
   } else if (isGptImage) {
     if (aspectRatioValue) parameters.size = aspectRatioValue
     parameters.gptImageOperation = params.hasReferenceImages ? 'edits' : 'generations'
-    parameters.model = remoteModel || 'gpt-image-1.5'
+    parameters.model = remoteModel || 'gpt-image-2-all'
   } else if (isNanoBananaPro) {
     if (supportsSizeSelect && aspectRatioValue) {
       parameters.aspectRatio = aspectRatioValue

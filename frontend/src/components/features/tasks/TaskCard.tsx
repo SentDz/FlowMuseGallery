@@ -13,6 +13,7 @@ import type { ApiTask } from '@/lib/api/types/task'
 import { cn } from '@/lib/utils/cn'
 import { MaskEditor } from './MaskEditor'
 import { PromptEditModal } from './PromptEditModal'
+import { ImageRetryModal } from './ImageRetryModal'
 import { toast } from 'sonner'
 
 interface TaskCardProps {
@@ -32,6 +33,8 @@ export function TaskCard({ task, onUpdate, onDelete }: TaskCardProps) {
   const [isGptImageEdit, setIsGptImageEdit] = useState(false) // 标记是否为GPT Image编辑
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [imageLoaded, setImageLoaded] = useState(false) // 图片加载状态
+  const [showImageRetryModal, setShowImageRetryModal] = useState(false)
+  const [retryTaskDetail, setRetryTaskDetail] = useState<ApiTask | null>(null)
   const mjActionResetTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   const service = task.type === 'image' ? imageService : videoService
@@ -79,15 +82,54 @@ export function TaskCard({ task, onUpdate, onDelete }: TaskCardProps) {
     }
   }
 
-  // 重试任务
-  const handleRetry = async () => {
+  const openImageRetryModal = async () => {
     setIsActionLoading(true)
     try {
-      const nextTask = await service.retryTask(task.id)
+      const taskDetail = await imageService.getTask(task.id)
+      setRetryTaskDetail(taskDetail)
+      setShowImageRetryModal(true)
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : String(err)
+      console.error('Failed to load image task detail:', err)
+      toast.error(errorMessage || t('errors.retry'))
+    } finally {
+      setIsActionLoading(false)
+    }
+  }
+
+  // 重试任务
+  const handleRetry = async () => {
+    if (task.type === 'image') {
+      await openImageRetryModal()
+      return
+    }
+
+    setIsActionLoading(true)
+    try {
+      const nextTask = await videoService.retryTask(task.id)
       onUpdate(nextTask)
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : String(err)
       console.error('Failed to retry task:', err)
+      toast.error(errorMessage || t('errors.retry'))
+    } finally {
+      setIsActionLoading(false)
+    }
+  }
+
+  const handleImageRetry = async (input: { modelId: string; parameters: Record<string, unknown> }) => {
+    if (task.type !== 'image') return
+
+    setIsActionLoading(true)
+    try {
+      const nextTask = await imageService.retryTask(task.id, input)
+      onUpdate(nextTask)
+      setShowImageRetryModal(false)
+      setRetryTaskDetail(null)
+      toast.success(t('success.retried'))
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : String(err)
+      console.error('Failed to retry image task:', err)
       toast.error(errorMessage || t('errors.retry'))
     } finally {
       setIsActionLoading(false)
@@ -674,7 +716,8 @@ export function TaskCard({ task, onUpdate, onDelete }: TaskCardProps) {
             )}
 
             {/* 重试按钮 */}
-            {task.status === 'failed' && (
+            {((task.type === 'image' && (task.status === 'completed' || task.status === 'failed')) ||
+              (task.type === 'video' && task.status === 'failed')) && (
               <Button
                 size="sm"
                 variant="secondary"
@@ -789,6 +832,17 @@ export function TaskCard({ task, onUpdate, onDelete }: TaskCardProps) {
         onSubmit={handleNanobananaPromptSubmit}
       />
     )}
+
+    <ImageRetryModal
+      isOpen={showImageRetryModal}
+      task={retryTaskDetail}
+      isSubmitting={isActionLoading}
+      onClose={() => {
+        setShowImageRetryModal(false)
+        setRetryTaskDetail(null)
+      }}
+      onSubmit={handleImageRetry}
+    />
   </>
   )
 }

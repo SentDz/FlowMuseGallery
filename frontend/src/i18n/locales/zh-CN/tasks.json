@@ -45,6 +45,17 @@
     "download": "下载",
     "share": "分享"
   },
+  "retryModal": {
+    "title": "重试图片任务",
+    "model": "选择模型",
+    "loadingModels": "正在加载模型...",
+    "defaultParams": "使用目标模型默认参数",
+    "reference": "张参考图",
+    "references": "张参考图",
+    "cancel": "取消",
+    "submit": "开始重试",
+    "submitting": "提交中..."
+  },
   "midjourney": {
     "actions": "操作",
     "submitting": "提交中...",
@@ -121,6 +132,7 @@
   },
   "errors": {
     "load": "加载任务列表失败",
+    "loadModels": "加载图片模型失败",
     "delete": "删除任务失败",
     "cancel": "取消任务失败",
     "retry": "重试任务失败",

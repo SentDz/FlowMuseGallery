@@ -2,6 +2,8 @@ import axios from 'axios';
 
 import { BaseImageAdapter, ImageGenerateParams, TaskStatusResponse, ValidationResult } from '../base/base-image.adapter';
 
+const DEFAULT_GPT_IMAGE_MODEL = 'gpt-image-2-all';
+
 type OpenAIImageDataItem = {
   url?: string;
   b64_json?: string;
@@ -198,7 +200,7 @@ export class GptImageAdapter extends BaseImageAdapter {
     };
 
     const model = asString((params as any).model) ?? asString((params as any).gptImageModel) ?? asString((params as any).modelId);
-    body.model = model ?? 'gpt-image-1.5';
+    body.model = model ?? DEFAULT_GPT_IMAGE_MODEL;
 
     const n = asNumber((params as any).n ?? (params as any)['n']);
     body.n = n ?? 1;
@@ -252,7 +254,7 @@ export class GptImageAdapter extends BaseImageAdapter {
     }
 
     const model = asString((params as any).model) ?? asString((params as any).gptImageModel);
-    if (model) form.append('model', model);
+    form.append('model', model ?? DEFAULT_GPT_IMAGE_MODEL);
 
     const n = asNumber((params as any).n ?? (params as any)['n']);
     if (n !== undefined) form.append('n', String(n));

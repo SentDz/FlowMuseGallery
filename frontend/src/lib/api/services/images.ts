@@ -9,12 +9,13 @@ import type { ApiTask, TaskStatus } from '../types/task'
 import type { PaginationParams, PaginatedResult } from '../types/pagination'
 import type {
   GenerateImageDto,
+  RetryImageTaskDto,
   MidjourneyActionDto,
   MidjourneyModalDto,
   MidjourneyEditsDto,
 } from '../types/images'
 
-function normalizeGenerateImagePayload(data: GenerateImageDto): GenerateImageDto {
+function normalizeImagePayload<T extends { parameters?: Record<string, unknown> }>(data: T): T {
   const parameters = data.parameters
   if (!parameters || typeof parameters !== 'object') return data
 
@@ -35,7 +36,7 @@ export const imageService = {
    * POST /images/generate
    */
   async generate(data: GenerateImageDto): Promise<ApiTask> {
-    return apiClient.post('/images/generate', normalizeGenerateImagePayload(data))
+    return apiClient.post('/images/generate', normalizeImagePayload(data))
   },
 
   /**
@@ -66,8 +67,8 @@ export const imageService = {
    * 重试图片任务
    * POST /images/tasks/:id/retry
    */
-  async retryTask(id: string): Promise<ApiTask> {
-    return apiClient.post(`/images/tasks/${id}/retry`)
+  async retryTask(id: string, data?: RetryImageTaskDto): Promise<ApiTask> {
+    return apiClient.post(`/images/tasks/${id}/retry`, data ? normalizeImagePayload(data) : undefined)
   },
 
   /**
