@@ -354,7 +354,7 @@
   {
     "id": 29,
     "name": "GPT Image 2",
-    "modelKey": "gpt-image-2-all",
+    "modelKey": "gpt-image-2",
     "icon": "/model-icons/gpt-image.svg",
     "type": "image",
     "provider": "gptimage",

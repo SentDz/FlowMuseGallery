@@ -2061,7 +2061,7 @@ export function SimplifiedCreateContent() {
           parameters.size = aspectRatio
           // 根据是否有输入图片决定使用 generations 或 edits 接口
           parameters.gptImageOperation = hasImageReferenceInputs ? 'edits' : 'generations'
-          parameters.model = selectedModel?.capabilities?.remoteModel || 'gpt-image-2-all'
+          parameters.model = selectedModel?.capabilities?.remoteModel || 'gpt-image-2'
         } else if (isNanoBananaPro) {
           // Nano Banana Pro / Gemini Pro: 使用 aspectRatio 和 imageSize
           if (supportsSizeSelect) {

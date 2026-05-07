@@ -2,7 +2,7 @@ import axios from 'axios';
 
 import { BaseImageAdapter, ImageGenerateParams, TaskStatusResponse, ValidationResult } from '../base/base-image.adapter';
 
-const DEFAULT_GPT_IMAGE_MODEL = 'gpt-image-2-all';
+const DEFAULT_GPT_IMAGE_MODEL = 'gpt-image-2';
 
 type OpenAIImageDataItem = {
   url?: string;

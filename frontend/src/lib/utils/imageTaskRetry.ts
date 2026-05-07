@@ -1,7 +1,7 @@
 import type { ApiTask } from '@/lib/api/types/task'
 import type { ModelWithCapabilities } from '@/lib/api/types/modelCapabilities'
 
-const DEFAULT_GPT_IMAGE_MODEL = 'gpt-image-2-all'
+const DEFAULT_GPT_IMAGE_MODEL = 'gpt-image-2'
 
 function asRecord(value: unknown): Record<string, unknown> {
   return value && typeof value === 'object' && !Array.isArray(value)

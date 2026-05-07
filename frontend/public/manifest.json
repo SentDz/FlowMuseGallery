@@ -1,7 +1,7 @@
 {
-  "name": "FlowMuse",
-  "short_name": "FlowMuse",
-  "description": "FlowMuse支持图像生成、视频生成与 AI 对话的一体化创作体验",
+  "name": "灵境设计",
+  "short_name": "灵境设计",
+  "description": "灵境设计支持图像生成、视频生成与 AI 对话的一体化创作体验",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#ffffff",

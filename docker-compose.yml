@@ -17,11 +17,12 @@ services:
     environment:
       DATABASE_URL: ${DATABASE_URL:-file:./data/flowmuse.sqlite}
       PORT: 3000
+      HOST: 0.0.0.0
       APP_PUBLIC_URL: ${APP_PUBLIC_URL:-http://localhost:3000}
       FRONTEND_URL: ${FRONTEND_URL:-http://localhost:3001}
       APP_ENCRYPTION_KEY: ${APP_ENCRYPTION_KEY:-change-me-32-bytes-minimum-length}
     command: >
-      sh -c "mkdir -p /app/prisma/data /app/uploads && ./node_modules/.bin/prisma migrate deploy && node dist/src/main.js"
+      sh -c "mkdir -p /app/prisma/data /app/uploads && ./node_modules/.bin/prisma migrate deploy && node prisma/seed.js && node dist/src/main.js"
     ports:
       - "${BACKEND_PORT:-3000}:3000"
     volumes:

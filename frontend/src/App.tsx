@@ -18,7 +18,7 @@ import { defaultLocale, locales, type Locale } from '@/i18n/locales'
 import { tasksService } from '@/lib/api/services/tasks'
 import type { ApiTask } from '@/lib/api/types'
 
-const SITE_TITLE = 'FlowMuse'
+const SITE_TITLE = '灵境设计'
 const HOME_HERO_TASK_PAGE_SIZE = 48
 
 type RouteMatch = {

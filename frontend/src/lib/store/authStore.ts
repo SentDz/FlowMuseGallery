@@ -8,7 +8,7 @@ import type { UserProfile } from '../api/types'
 
 const LOCAL_USER: UserProfile = {
   id: '1',
-  email: 'local@flowmuse.personal',
+  email: 'local@lingjing.design',
   username: 'Local User',
   avatar: null,
   role: 'admin',

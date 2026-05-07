@@ -1,9 +1,7 @@
 'use client'
 
 import { useMemo } from 'react'
-import { Github } from 'lucide-react'
 
-import { PERSONAL_GITHUB_URL } from '@/lib/utils/siteSettings'
 import { useLandingHomePageShell } from './LandingHomePageShellClient'
 import { type LandingHomeCopy } from './landingHomePage.shared'
 import styles from './LandingHomePage.module.css'
@@ -41,16 +39,6 @@ export function LandingTopBarActions({
           {item.label}
         </button>
       ))}
-      <a
-        href={PERSONAL_GITHUB_URL}
-        target="_blank"
-        rel="noreferrer"
-        className={`${styles.capsuleMenuItem} ${styles.capsuleMenuIconItem}`}
-        aria-label="GitHub"
-        title="GitHub"
-      >
-        <Github aria-hidden="true" />
-      </a>
     </nav>
   )
 }
