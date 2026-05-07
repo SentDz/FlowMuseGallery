@@ -283,7 +283,7 @@ export function TasksContent() {
         {/* Task List */}
         {isLoading ? (
           <FadeIn variant="fade" delay={0.2}>
-            <div className="grid grid-cols-1 gap-6 xl:grid-cols-2">
+            <div className="grid grid-cols-1 gap-4 xl:grid-cols-2 2xl:grid-cols-3">
               {Array.from({ length: 4 }).map((_, i) => (
                 <div key={i}>
                   <SkeletonTaskCard />
@@ -312,7 +312,7 @@ export function TasksContent() {
         ) : (
           <>
             <FadeIn variant="fade" delay={0.2}>
-              <div className="grid grid-cols-1 gap-6 xl:grid-cols-2">
+              <div className="grid grid-cols-1 gap-4 xl:grid-cols-2 2xl:grid-cols-3">
                 {filteredTasks.map((task, index) => (
                   <div key={`${task.type}-${task.id}`}>
                     <FadeIn variant="scale" delay={Math.min(index, 6) * 0.04}>

@@ -9,7 +9,7 @@
     "channelId": 1,
     "defaultParams": null,
     "paramConstraints": null,
-    "isActive": true,
+    "isActive": false,
     "sortOrder": 20,
     "description": "具备图像生成和对话式多轮编辑功能，专为快速创意工作流程而优化。",
     "supportsImageInput": true,
@@ -31,7 +31,7 @@
     "channelId": 1,
     "defaultParams": null,
     "paramConstraints": null,
-    "isActive": true,
+    "isActive": false,
     "sortOrder": 30,
     "description": "Nano Banana pro是Google Gemini系列中的下一代AI图像生成与编辑模型,是Gemini 2.5 Flash Image(Nano Banana)的升级版。该模型融合多模态Transformer和扩散模型,原生支持2K(2048×2048)及4K分辨率输出,在图像质量、文字渲染、物理推理等方面实现显著提升。",
     "supportsImageInput": true,
@@ -53,7 +53,7 @@
     "channelId": 2,
     "defaultParams": null,
     "paramConstraints": null,
-    "isActive": true,
+    "isActive": false,
     "sortOrder": 170,
     "description": null,
     "supportsImageInput": true,
@@ -75,7 +75,7 @@
     "channelId": 4,
     "defaultParams": null,
     "paramConstraints": null,
-    "isActive": true,
+    "isActive": false,
     "sortOrder": 70,
     "description": "Seedream 4.5 原生支持文本、单图和多图输入，实现基于主体一致性的多图融合创作、图像编辑、组图生成等多样玩法，让图像创作更加自由可控",
     "supportsImageInput": true,
@@ -97,7 +97,7 @@
     "channelId": 1,
     "defaultParams": null,
     "paramConstraints": null,
-    "isActive": true,
+    "isActive": false,
     "sortOrder": 10,
     "description": "Nano Banana 2 以主流价格提供高质量的图片生成和对话式编辑功能，延迟时间短。",
     "supportsImageInput": true,
@@ -119,7 +119,7 @@
     "channelId": 4,
     "defaultParams": null,
     "paramConstraints": null,
-    "isActive": true,
+    "isActive": false,
     "sortOrder": 60,
     "description": null,
     "supportsImageInput": true,
@@ -141,7 +141,7 @@
     "channelId": 10,
     "defaultParams": null,
     "paramConstraints": null,
-    "isActive": true,
+    "isActive": false,
     "sortOrder": 110,
     "description": null,
     "supportsImageInput": true,
@@ -163,7 +163,7 @@
     "channelId": 10,
     "defaultParams": null,
     "paramConstraints": null,
-    "isActive": true,
+    "isActive": false,
     "sortOrder": 120,
     "description": "万相2.7-图像生成与编辑，支持文生图、文生组图、图生组图、图像编辑、多图参考生成、交互式编辑，在文字渲染、主体一致性、复杂指令遵循上都有更强表现",
     "supportsImageInput": true,
@@ -360,7 +360,23 @@
     "provider": "gptimage",
     "channelId": 3,
     "defaultParams": null,
-    "paramConstraints": null,
+    "paramConstraints": {
+      "sizes": {
+        "1K": [
+          "1024x1024"
+        ],
+        "2K": [
+          "1536x1024",
+          "1024x1536",
+          "1792x1024",
+          "1024x1792"
+        ],
+        "4K": [
+          "2160x3840",
+          "3840x2160"
+        ]
+      }
+    },
     "isActive": true,
     "sortOrder": 50,
     "description": null,
@@ -369,7 +385,7 @@
     "supportsSizeSelect": false,
     "supportsQuickMode": true,
     "supportsAgentMode": true,
-    "supportsAutoMode": true,
+    "supportsAutoMode": false,
     "maxContextRounds": null,
     "systemPrompt": null
   }

@@ -6,6 +6,7 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
+import { ExternalLink } from 'lucide-react'
 import { useTranslations } from '@/i18n/client'
 import { Button, Card } from '@/components/ui'
 import { imageService, videoService } from '@/lib/api/services'
@@ -43,6 +44,8 @@ export function TaskCard({ task, onUpdate, onDelete }: TaskCardProps) {
   const isOperationExpired =
     Number.isFinite(operationBaseMs) && Date.now() - operationBaseMs > 24 * 60 * 60 * 1000
   const isMjActionPending = pendingMjActionId !== null
+  const previewImageUrl = task.thumbnailUrl || task.resultUrl || ''
+  const openImageUrl = task.resultUrl || task.thumbnailUrl || ''
   const failureReason = (() => {
     const raw = task.errorMessage?.trim()
     if (!raw) return t('failure.unknown')
@@ -452,13 +455,13 @@ export function TaskCard({ task, onUpdate, onDelete }: TaskCardProps) {
 
   return (
     <>
-    <Card variant="glass" className="relative overflow-hidden">
+    <Card variant="glass" className="relative overflow-hidden rounded-xl p-4">
       <div className="flex flex-col h-full">
         {/* 预览图 */}
         {task.status === 'completed' && (task.thumbnailUrl || task.resultUrl) && (
-          <div className="relative w-full mb-4 rounded-lg overflow-hidden">
+          <div className="relative w-full mb-3 rounded-lg overflow-hidden">
             {task.type === 'image' ? (
-              <div className="aspect-video bg-gradient-to-br from-stone-100 via-stone-50 to-stone-100">
+              <div className="relative mx-auto flex h-[150px] w-full max-w-[320px] items-center justify-center overflow-hidden rounded-lg bg-gradient-to-br from-stone-100 via-stone-50 to-stone-100 sm:h-[180px] sm:max-w-[360px]">
                 {/* 占位符 */}
                 {!imageLoaded && (
                   <div className="absolute inset-0 w-full h-full flex items-center justify-center animate-pulse">
@@ -472,19 +475,35 @@ export function TaskCard({ task, onUpdate, onDelete }: TaskCardProps) {
                   </div>
                 )}
                 <img
-                  src={task.thumbnailUrl || task.resultUrl || ''}
+                  src={previewImageUrl}
                   alt={task.prompt}
                   loading="lazy"
                   className={cn(
-                    'w-full h-auto object-contain transition-opacity duration-300',
+                    'h-full w-full object-contain transition-opacity duration-300',
                     imageLoaded ? 'opacity-100' : 'opacity-0'
                   )}
                   onLoad={() => setImageLoaded(true)}
                   onError={(e) => {
-                    console.error('[TaskCard] Image load error for task:', task.id, 'url:', task.thumbnailUrl || task.resultUrl)
+                    console.error('[TaskCard] Image load error for task:', task.id, 'url:', previewImageUrl)
                     setImageLoaded(true) // 即使错误也标记为已加载
                   }}
                 />
+                {openImageUrl && (
+                  <a
+                    href={openImageUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    title="在新窗口打开"
+                    aria-label="在新窗口打开图片"
+                    className={cn(
+                      'absolute right-2 top-2 z-10 inline-flex h-8 w-8 items-center justify-center rounded-full border border-white/80 bg-white/90 text-stone-700 shadow-sm backdrop-blur transition',
+                      'hover:bg-white hover:text-stone-950',
+                      'dark:border-white/10 dark:bg-stone-950/75 dark:text-stone-200 dark:hover:bg-stone-900 dark:hover:text-white'
+                    )}
+                  >
+                    <ExternalLink className="h-4 w-4" aria-hidden="true" />
+                  </a>
+                )}
               </div>
             ) : (
               <video
@@ -503,9 +522,9 @@ export function TaskCard({ task, onUpdate, onDelete }: TaskCardProps) {
 
         {/* 调试信息：显示为什么没有预览图 */}
         {task.status === 'completed' && !task.resultUrl && !task.thumbnailUrl && (
-          <div className="relative w-full aspect-video mb-4 rounded-lg overflow-hidden bg-yellow-50 border-2 border-yellow-200 flex items-center justify-center">
-            <div className="text-center p-4">
-              <p className="text-yellow-800 font-medium mb-2">⚠️ 任务已完成但无结果文件</p>
+          <div className="relative w-full aspect-video mb-3 rounded-lg overflow-hidden bg-yellow-50 border-2 border-yellow-200 flex items-center justify-center">
+            <div className="text-center p-3">
+              <p className="text-yellow-800 font-medium mb-1.5">⚠️ 任务已完成但无结果文件</p>
               <p className="text-xs text-yellow-600">resultUrl 和 thumbnailUrl 都为空</p>
               <p className="text-xs text-yellow-600 mt-1">任务ID: {task.id}</p>
             </div>
@@ -515,27 +534,27 @@ export function TaskCard({ task, onUpdate, onDelete }: TaskCardProps) {
         {/* 任务信息 */}
         <div className="flex-1">
           {/* 状态标签 */}
-          <div className="flex items-center justify-between mb-3">
+          <div className="flex items-center justify-between mb-2">
             <span
               className={cn(
-                'inline-flex items-center px-3 py-1 rounded-full text-xs font-medium border',
+                'inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-medium border',
                 statusColors[task.status]
               )}
             >
               {t(`status.${task.status}`)}
             </span>
-            <span className="text-xs text-stone-500">
+            <span className="text-[11px] text-stone-500">
               {task.type === 'image' ? '图片' : '视频'}
             </span>
           </div>
 
-          <p className="font-ui text-sm text-stone-900 dark:text-stone-100 mb-3 line-clamp-2">
+          <p className="font-ui text-xs leading-5 text-stone-900 dark:text-stone-100 mb-2 line-clamp-2">
             {task.prompt}
           </p>
 
           {/* 错误信息 */}
           {task.status === 'failed' && (
-            <div className="mb-3 rounded-xl border border-red-200 bg-red-50 p-3 dark:border-red-900/60 dark:bg-red-950/30">
+            <div className="mb-2 rounded-lg border border-red-200 bg-red-50 p-2.5 dark:border-red-900/60 dark:bg-red-950/30">
               <div className="mb-1.5 flex items-center gap-1.5 text-xs font-semibold text-red-700 dark:text-red-200">
                 <svg className="h-3.5 w-3.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path
@@ -547,14 +566,14 @@ export function TaskCard({ task, onUpdate, onDelete }: TaskCardProps) {
                 </svg>
                 <span>{t('failure.reason')}</span>
               </div>
-              <p className="max-h-40 overflow-y-auto whitespace-pre-wrap break-words font-ui text-xs leading-5 text-red-700 dark:text-red-100">
+              <p className="max-h-28 overflow-y-auto whitespace-pre-wrap break-words font-ui text-xs leading-5 text-red-700 dark:text-red-100">
                 {failureReason}
               </p>
             </div>
           )}
 
           {/* 详细信息 */}
-          <div className="grid grid-cols-1 gap-2 text-xs text-stone-600 dark:text-stone-400 mb-4">
+          <div className="grid grid-cols-1 gap-1.5 text-[11px] text-stone-600 dark:text-stone-400 mb-3">
             <div>
               <span className="font-medium">{t('info.createdAt')}:</span>{' '}
               {new Date(task.createdAt).toLocaleDateString()}
@@ -566,8 +585,8 @@ export function TaskCard({ task, onUpdate, onDelete }: TaskCardProps) {
             (task.provider === 'midjourney' || task.provider === 'mj') &&
             mjButtons &&
             mjButtons.length > 0 && (
-              <div className="mb-4">
-                <p className="font-ui text-xs font-medium text-stone-700 mb-2">
+              <div className="mb-3">
+                <p className="font-ui text-xs font-medium text-stone-700 mb-1.5">
                   {t('midjourney.actions')}:
                 </p>
                 {isOperationExpired ? (
@@ -575,7 +594,7 @@ export function TaskCard({ task, onUpdate, onDelete }: TaskCardProps) {
                     生成时间超过24小时，无法继续操作
                   </p>
                 ) : null}
-                <div className="grid grid-cols-4 gap-2">
+                <div className="grid grid-cols-4 gap-1.5">
                   {mjButtons.map((button, index) => (
                     <Button
                       key={index}
@@ -583,7 +602,7 @@ export function TaskCard({ task, onUpdate, onDelete }: TaskCardProps) {
                       variant="secondary"
                       onClick={() => handleMjAction(button.customId, button.label)}
                       disabled={isActionLoading || isOperationExpired || isMjActionPending}
-                      className="text-xs"
+                      className="h-8 px-2.5 text-xs"
                     >
                       {pendingMjActionId === button.customId
                         ? t('midjourney.submitting')
@@ -599,8 +618,8 @@ export function TaskCard({ task, onUpdate, onDelete }: TaskCardProps) {
             task.type === 'image' &&
             task.provider === 'gptimage' &&
             task.resultUrl && (
-              <div className="mb-4">
-                <p className="font-ui text-xs font-medium text-stone-700 mb-2">
+              <div className="mb-3">
+                <p className="font-ui text-xs font-medium text-stone-700 mb-1.5">
                   GPT Image 操作:
                 </p>
                 <Button
@@ -608,7 +627,7 @@ export function TaskCard({ task, onUpdate, onDelete }: TaskCardProps) {
                   variant="secondary"
                   onClick={handleGptImageEdit}
                   disabled={isActionLoading}
-                  className="w-full"
+                  className="h-8 w-full px-3 text-xs"
                 >
                   <svg
                     className="w-4 h-4 mr-2"
@@ -633,8 +652,8 @@ export function TaskCard({ task, onUpdate, onDelete }: TaskCardProps) {
             task.type === 'image' &&
             task.provider === 'nanobanana' &&
             task.resultUrl && (
-              <div className="mb-4">
-                <p className="font-ui text-xs font-medium text-stone-700 mb-2">
+              <div className="mb-3">
+                <p className="font-ui text-xs font-medium text-stone-700 mb-1.5">
                   Nanobanana 操作:
                 </p>
                 <Button
@@ -642,7 +661,7 @@ export function TaskCard({ task, onUpdate, onDelete }: TaskCardProps) {
                   variant="secondary"
                   onClick={handleNanobananaRemix}
                   disabled={isActionLoading}
-                  className="w-full"
+                  className="h-8 w-full px-3 text-xs"
                 >
                   <svg
                     className="w-4 h-4 mr-2"
@@ -663,14 +682,14 @@ export function TaskCard({ task, onUpdate, onDelete }: TaskCardProps) {
             )}
 
           {/* 操作按钮 */}
-          <div className="flex flex-wrap gap-2">
+          <div className="flex flex-wrap gap-1.5">
             {task.type === 'video' && task.canCancel && (
               <Button
                 size="sm"
                 variant="secondary"
                 onClick={handleCancel}
                 disabled={isActionLoading}
-                className="flex-1 min-w-[100px]"
+                className="h-8 flex-1 min-w-[84px] px-3 text-xs"
               >
                 <svg
                   className="w-4 h-4 mr-1"
@@ -696,7 +715,7 @@ export function TaskCard({ task, onUpdate, onDelete }: TaskCardProps) {
                 variant="secondary"
                 onClick={handleDownload}
                 disabled={isActionLoading}
-                className="flex-1 min-w-[100px]"
+                className="h-8 flex-1 min-w-[84px] px-3 text-xs"
               >
                 <svg
                   className="w-4 h-4 mr-1"
@@ -723,7 +742,7 @@ export function TaskCard({ task, onUpdate, onDelete }: TaskCardProps) {
                 variant="secondary"
                 onClick={handleRetry}
                 disabled={isActionLoading}
-                className="flex-1 min-w-[80px]"
+                className="h-8 flex-1 min-w-[84px] px-3 text-xs"
               >
                 <svg
                   className="w-4 h-4 mr-1"
@@ -749,7 +768,7 @@ export function TaskCard({ task, onUpdate, onDelete }: TaskCardProps) {
                 variant="ghost"
                 onClick={() => setShowConfirmDelete(true)}
                 disabled={isActionLoading}
-                className="shrink-0 whitespace-nowrap text-red-600 hover:bg-red-50"
+                className="h-8 shrink-0 whitespace-nowrap px-3 text-xs text-red-600 hover:bg-red-50"
               >
                 <svg
                   className="w-4 h-4"
@@ -766,12 +785,12 @@ export function TaskCard({ task, onUpdate, onDelete }: TaskCardProps) {
                 </svg>
               </Button>
             ) : (
-              <div className="ml-auto inline-flex shrink-0 items-center gap-2">
+              <div className="ml-auto inline-flex shrink-0 items-center gap-1.5">
                 <Button
                   size="sm"
                   variant="ghost"
                   onClick={() => setShowConfirmDelete(false)}
-                  className="whitespace-nowrap"
+                  className="h-8 whitespace-nowrap px-3 text-xs"
                 >
                   {t('confirm.delete.cancel')}
                 </Button>
@@ -779,7 +798,7 @@ export function TaskCard({ task, onUpdate, onDelete }: TaskCardProps) {
                   size="sm"
                   onClick={handleDelete}
                   disabled={isActionLoading}
-                  className="whitespace-nowrap bg-red-600 hover:bg-red-700 text-white"
+                  className="h-8 whitespace-nowrap bg-red-600 px-3 text-xs text-white hover:bg-red-700"
                 >
                   {t('confirm.delete.confirm')}
                 </Button>

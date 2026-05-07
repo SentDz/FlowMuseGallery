@@ -9,7 +9,15 @@ export type AutoProjectModelOptionCatalog = {
   durations: string[];
 };
 
-const GPT_IMAGE_SIZE_VALUES = ['1024x1024', '1536x1024', '1024x1536'];
+const GPT_IMAGE_SIZE_VALUES = [
+  '1024x1024',
+  '1536x1024',
+  '1024x1536',
+  '1792x1024',
+  '1024x1792',
+  '2160x3840',
+  '3840x2160',
+];
 const QWEN_IMAGE_SIZE_VALUES = [
   '720*1280',
   '768*1152',

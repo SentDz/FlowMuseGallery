@@ -30,28 +30,46 @@ export interface AspectRatioOption {
 // GPT Image 尺寸选项（固定像素尺寸，不显示比例预览）
 export const GPT_IMAGE_SIZE_OPTIONS: AspectRatioOption[] = [
   {
-    value: 'auto',
-    label: 'Auto',
-    description: '自动选择最佳尺寸',
-    icon: Square,
-  },
-  {
     value: '1024x1024',
-    label: '1024×1024',
-    description: '正方形 - 1024x1024 像素',
+    label: '1K · 1024×1024',
+    description: '1K 正方形',
     icon: Square,
   },
   {
     value: '1536x1024',
-    label: '1536×1024',
-    description: '横版 - 1536x1024 像素',
+    label: '2K · 1536×1024',
+    description: '2K 横版',
     icon: RectangleHorizontal,
   },
   {
     value: '1024x1536',
-    label: '1024×1536',
-    description: '竖版 - 1024x1536 像素',
+    label: '2K · 1024×1536',
+    description: '2K 竖版',
     icon: RectangleVertical,
+  },
+  {
+    value: '1792x1024',
+    label: '2K · 1792×1024',
+    description: '2K 宽屏横版',
+    icon: RectangleHorizontal,
+  },
+  {
+    value: '1024x1792',
+    label: '2K · 1024×1792',
+    description: '2K 长图竖版',
+    icon: RectangleVertical,
+  },
+  {
+    value: '2160x3840',
+    label: '4K · 2160×3840',
+    description: '4K 竖版',
+    icon: RectangleVertical,
+  },
+  {
+    value: '3840x2160',
+    label: '4K · 3840×2160',
+    description: '4K 横版',
+    icon: RectangleHorizontal,
   },
 ]
 

@@ -178,9 +178,7 @@ export class StorageService {
   }
 
   private toObjectUrl(key: string) {
-    const base = this.localPublicBaseUrl();
-    const path = `/uploads/${key}`;
-    return base ? `${base}${path}` : path;
+    return `/uploads/${key}`;
   }
 
   private toCosObjectKey(settings: StorageSettings, key: string) {

@@ -479,6 +479,15 @@ export function buildModelCapabilities(model: AiModel, providerConfig?: ModelPro
     caps.supports.async = false;
     caps.supports.followUpActions = false;
     caps.limits.maxInputImages = 4;
+    caps.limits.imageSizes = [
+      '1024x1024',
+      '1536x1024',
+      '1024x1536',
+      '1792x1024',
+      '1024x1792',
+      '2160x3840',
+      '3840x2160',
+    ];
     caps.operations = [
       {
         key: 'generations',
