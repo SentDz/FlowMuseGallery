@@ -404,6 +404,8 @@ export function SimplifiedCreateContent() {
   // 视频特定参数
   const [videoDuration, setVideoDuration] = useState('5')
   const [videoResolution, setVideoResolution] = useState('720p')
+  const [ltxAdherence, setLtxAdherence] = useState('medium')
+  const [ltxTendency, setLtxTendency] = useState('diversity')
   const [videoInputImages, setVideoInputImages] = useState<File[]>([]) // 视频参考图（通用：Sora/Runway/Luma等）
   const [doubaoReferenceImages, setDoubaoReferenceImages] = useState<File[]>([]) // 豆包参考图
   const [doubaoReferenceVideos, setDoubaoReferenceVideos] = useState<File[]>([]) // 豆包参考视频
@@ -697,6 +699,11 @@ export function SimplifiedCreateContent() {
   const isWanxVideo = useMemo(() => {
     const provider = normalizeProviderFamily(selectedModel?.provider)
     return activeTab === 'video' && provider.includes('wanx')
+  }, [selectedModel, activeTab])
+
+  const isLtxVideo = useMemo(() => {
+    const provider = normalizeProviderFamily(selectedModel?.provider)
+    return activeTab === 'video' && provider === 'ltx'
   }, [selectedModel, activeTab])
 
   const isWanx27Video = useMemo(() => {
@@ -1526,6 +1533,22 @@ export function SimplifiedCreateContent() {
     }
   }, [isWanxVideo, videoDuration, wanxVideoDurationOptions])
 
+  useEffect(() => {
+    if (!isLtxVideo) return
+    if (['3', '5', '8', '10'].includes(videoDuration)) return
+    setVideoDuration('5')
+  }, [isLtxVideo, videoDuration])
+
+  useEffect(() => {
+    if (!isLtxVideo) return
+    if (!['high', 'medium', 'low'].includes(ltxAdherence)) {
+      setLtxAdherence('medium')
+    }
+    if (!['consistency', 'diversity'].includes(ltxTendency)) {
+      setLtxTendency('diversity')
+    }
+  }, [isLtxVideo, ltxAdherence, ltxTendency])
+
   // 文件转 base64 工具函数
   const toBase64 = (file: File): Promise<string> => {
     return new Promise((resolve, reject) => {
@@ -2010,6 +2033,17 @@ export function SimplifiedCreateContent() {
       }
     }
 
+    if (activeTab === 'video' && isLtxVideo) {
+      if (totalVideoReferenceImageCount !== 1) {
+        toast.error(t('errors.ltxFirstFrameRequired'))
+        return
+      }
+      if (!['3', '5', '8', '10'].includes(videoDuration)) {
+        toast.error(t('errors.ltxDurationUnsupported'))
+        return
+      }
+    }
+
     if (activeTab === 'video' && !isDoubaoSeedance20) {
       if (isDoubaoVideo && totalDoubaoReferenceImageCount > 4) {
         toast.error(t('errors.referenceLimitReached', { max: 4 }))
@@ -2140,6 +2174,10 @@ export function SimplifiedCreateContent() {
           if (isDoubaoSeedance20) {
             parameters.generate_audio = doubaoGenerateAudio
           }
+        } else if (isLtxVideo) {
+          parameters.duration = parseInt(videoDuration) || 5
+          parameters.adherence = ltxAdherence || 'medium'
+          parameters.tendency = ltxTendency || 'diversity'
         }
       }
 
@@ -2901,6 +2939,7 @@ export function SimplifiedCreateContent() {
                 wanxVideoContinuationEnabled={wanxVideoContinuationEnabled}
                 setWanxVideoContinuationEnabled={setWanxVideoContinuationEnabled}
                 isDoubaoVideo={isDoubaoVideo}
+                isLtxVideo={isLtxVideo}
                 isDoubaoSeedance20={isDoubaoSeedance20}
                 hasDoubaoSeedance20ReferenceInputs={hasDoubaoSeedance20ReferenceInputs}
                 hasDoubaoSeedance20FrameInputs={hasDoubaoSeedance20FrameInputs}
@@ -2929,6 +2968,10 @@ export function SimplifiedCreateContent() {
                 seedanceSwitchClassName={seedanceSwitchClassName}
                 videoDuration={videoDuration}
                 setVideoDuration={setVideoDuration}
+                ltxAdherence={ltxAdherence}
+                setLtxAdherence={setLtxAdherence}
+                ltxTendency={ltxTendency}
+                setLtxTendency={setLtxTendency}
                 videoResolution={videoResolution}
                 setVideoResolution={setVideoResolution}
                 aspectRatio={aspectRatio}

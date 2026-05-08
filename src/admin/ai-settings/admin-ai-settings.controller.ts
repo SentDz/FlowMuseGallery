@@ -4,12 +4,14 @@ import { Roles } from '../../common/decorators/roles.decorator';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { RolesGuard } from '../../common/guards/roles.guard';
 import { AiSettingsService } from '../../settings/ai-settings.service';
+import { LtxSettingsService } from '../../settings/ltx-settings.service';
 import { StorageSettingsService } from '../../settings/storage-settings.service';
 import { ReorderModelsDto } from '../models/dto/reorder-models.dto';
 import { AdminChatModelsService } from './admin-chat-models.service';
 import { CreateChatModelDto } from './dto/create-chat-model.dto';
 import { UpdateChatModelDto } from './dto/update-chat-model.dto';
 import { UpdateAiSettingsDto } from './dto/update-ai-settings.dto';
+import { UpdateLtxSettingsDto } from './dto/update-ltx-settings.dto';
 import { UpdateStorageSettingsDto } from './dto/update-storage-settings.dto';
 
 @UseGuards(JwtAuthGuard, RolesGuard)
@@ -18,6 +20,7 @@ import { UpdateStorageSettingsDto } from './dto/update-storage-settings.dto';
 export class AdminAiSettingsController {
   constructor(
     private readonly aiSettings: AiSettingsService,
+    private readonly ltxSettings: LtxSettingsService,
     private readonly storageSettings: StorageSettingsService,
     private readonly chatModelsService: AdminChatModelsService,
   ) {}
@@ -40,6 +43,16 @@ export class AdminAiSettingsController {
   @Put('storage')
   updateStorageSettings(@Body() dto: UpdateStorageSettingsDto) {
     return this.storageSettings.setStorageSettings(dto);
+  }
+
+  @Get('ltx')
+  getLtxSettings() {
+    return this.ltxSettings.getLtxSettingsForAdmin();
+  }
+
+  @Put('ltx')
+  updateLtxSettings(@Body() dto: UpdateLtxSettingsDto) {
+    return this.ltxSettings.setLtxSettings(dto);
   }
 
   @Get('chat-models')

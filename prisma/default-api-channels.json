@@ -52,5 +52,14 @@
     "timeout": 900000,
     "maxRetry": 3,
     "priority": 100
+  },
+  {
+    "id": 12,
+    "name": "LTX ComfyUI",
+    "provider": "ltx",
+    "baseUrl": "",
+    "timeout": 7200000,
+    "maxRetry": 1,
+    "priority": 100
   }
 ]

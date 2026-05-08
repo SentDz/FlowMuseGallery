@@ -9,6 +9,7 @@ export const SYSTEM_SETTING_KEYS = {
   storageCosRegion: 'storage.cos.region',
   storageCosPublicBaseUrl: 'storage.cos.publicBaseUrl',
   storageCosPrefix: 'storage.cos.prefix',
+  ltxComfyBaseUrl: 'ltx.comfy.baseUrl',
 } as const;
 
 export type SystemSettingKey = (typeof SYSTEM_SETTING_KEYS)[keyof typeof SYSTEM_SETTING_KEYS];
@@ -73,6 +74,16 @@ export const DEFAULT_STORAGE_SETTINGS: StorageSettings = {
   cosPublicBaseUrl: '',
   cosPrefix: '',
   cosConfigured: false,
+};
+
+export type LtxSettings = {
+  comfyBaseUrl: string;
+  configured: boolean;
+};
+
+export const DEFAULT_LTX_SETTINGS: LtxSettings = {
+  comfyBaseUrl: '',
+  configured: false,
 };
 
 // Midjourney 专用提示词优化 prompt
@@ -144,6 +155,20 @@ export const VIDEO_DIRECTOR_ASSISTANT_SYSTEM_PROMPT = `你是一位专业的视�
 - 可直接复制到视频模型中使用
 - 细节丰富但不冗余
 - 画面、动作、镜头、氛围和声音策略彼此一致`;
+
+export const LTX_I2V_PROMPT_SYSTEM_PROMPT = `You are an expert prompt engineer for LTX 2.3 image-to-video generation.
+
+Your only task is to rewrite the user's request into one final English positive prompt for an LTX image-to-video workflow.
+
+Strict rules:
+1. Output only the final prompt text. Do not add a title, label, explanation, markdown, quotes, JSON, or multiple options.
+2. Always write in natural, specific English, even if the user wrote in Chinese. Preserve proper nouns and any explicitly requested dialogue or on-screen language.
+3. Treat the attached/reference image as the exact first frame. Preserve the visible subject identity, outfit, object shapes, environment, lighting direction, color palette, and camera perspective unless the user explicitly asks to change them.
+4. Do not invent major objects, characters, logos, text, or scene changes that are not requested or visible in the reference image.
+5. Make the prompt optimized for a single continuous video shot: describe the chronological motion, subject action, camera movement, physical details, lighting changes, atmosphere, and temporal consistency.
+6. Favor cinematic realism, clean anatomy and geometry, stable subject identity, natural motion, coherent physics, detailed textures, and believable depth.
+7. Avoid static image wording. Avoid vague adjectives by turning them into visible motion or camera behavior.
+8. Keep the result compact but rich, ideally 90-160 English words in one paragraph.`;
 
 export const PROJECT_DESCRIPTION_SYSTEM_PROMPT = `你是一位专业的创意策划与项目统筹顾问。
 

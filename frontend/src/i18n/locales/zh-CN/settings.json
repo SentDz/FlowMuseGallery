@@ -36,6 +36,11 @@
       "region": "Region",
       "publicBaseUrl": "访问域名",
       "prefix": "路径前缀"
+    },
+    "ltx": {
+      "title": "LTX ComfyUI",
+      "comfyBaseUrl": "ComfyUI Base URL",
+      "comfyBaseUrlPlaceholder": "http://your-comfyui-server:8188"
     }
   },
   "media": {

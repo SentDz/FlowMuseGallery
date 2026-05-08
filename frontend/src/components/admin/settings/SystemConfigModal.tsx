@@ -33,6 +33,10 @@ const DEFAULT_STORAGE_FORM_DATA = {
   cosPrefix: '',
 }
 
+const DEFAULT_LTX_FORM_DATA = {
+  comfyBaseUrl: '',
+}
+
 interface SystemConfigModalProps {
   isOpen: boolean
   onClose: () => void
@@ -44,8 +48,10 @@ export function SystemConfigModal({ isOpen, onClose }: SystemConfigModalProps) {
   const [isLoading, setIsLoading] = useState(false)
   const [isSaving, setIsSaving] = useState(false)
   const [isStorageSaving, setIsStorageSaving] = useState(false)
+  const [isLtxSaving, setIsLtxSaving] = useState(false)
   const [formData, setFormData] = useState(() => ({ ...DEFAULT_AI_FORM_DATA }))
   const [storageFormData, setStorageFormData] = useState(() => ({ ...DEFAULT_STORAGE_FORM_DATA }))
+  const [ltxFormData, setLtxFormData] = useState(() => ({ ...DEFAULT_LTX_FORM_DATA }))
 
   useEffect(() => {
     if (isOpen) {
@@ -56,9 +62,10 @@ export function SystemConfigModal({ isOpen, onClose }: SystemConfigModalProps) {
   const loadSettings = async () => {
     try {
       setIsLoading(true)
-      const [data, storageData] = await Promise.all([
+      const [data, storageData, ltxData] = await Promise.all([
         adminAiService.getSettings(),
         adminAiService.getStorageSettings(),
+        adminAiService.getLtxSettings(),
       ])
       setFormData({
         apiBaseUrl: data.apiBaseUrl || '',
@@ -72,6 +79,9 @@ export function SystemConfigModal({ isOpen, onClose }: SystemConfigModalProps) {
         cosRegion: storageData.cosRegion || '',
         cosPublicBaseUrl: storageData.cosPublicBaseUrl || '',
         cosPrefix: storageData.cosPrefix || '',
+      })
+      setLtxFormData({
+        comfyBaseUrl: ltxData.comfyBaseUrl || '',
       })
     } catch (error) {
       toast.error(tCommon('failedToLoad'))
@@ -133,6 +143,24 @@ export function SystemConfigModal({ isOpen, onClose }: SystemConfigModalProps) {
       toast.error(tCommon('failedToSave'))
     } finally {
       setIsStorageSaving(false)
+    }
+  }
+
+  const handleLtxSubmit = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault()
+    try {
+      setIsLtxSaving(true)
+      const updated = await adminAiService.updateLtxSettings({
+        comfyBaseUrl: ltxFormData.comfyBaseUrl,
+      })
+      setLtxFormData({
+        comfyBaseUrl: updated.comfyBaseUrl || '',
+      })
+      toast.success(tCommon('saved'))
+    } catch (error) {
+      toast.error(tCommon('failedToSave'))
+    } finally {
+      setIsLtxSaving(false)
     }
   }
 
@@ -276,6 +304,33 @@ export function SystemConfigModal({ isOpen, onClose }: SystemConfigModalProps) {
                       className="rounded-lg bg-aurora-purple px-6 py-2 text-white transition-colors hover:bg-aurora-purple/90 disabled:cursor-not-allowed disabled:opacity-50"
                     >
                       {isStorageSaving ? tCommon('saving') : tCommon('save')}
+                    </Button>
+                  </div>
+                </Card>
+              </form>
+
+              <form onSubmit={handleLtxSubmit}>
+                <Card className={`${panelCardCls} space-y-5 p-6`}>
+                  <div className="text-sm font-medium text-stone-900 dark:text-stone-100">
+                    {t('ltx.title')}
+                  </div>
+                  <div>
+                    <label className={labelCls}>{t('ltx.comfyBaseUrl')}</label>
+                    <input
+                      type="url"
+                      value={ltxFormData.comfyBaseUrl}
+                      onChange={(event) => setLtxFormData({ ...ltxFormData, comfyBaseUrl: event.target.value })}
+                      placeholder={t('ltx.comfyBaseUrlPlaceholder')}
+                      className={inputCls}
+                    />
+                  </div>
+                  <div className="flex justify-end border-t border-stone-200 pt-5 dark:border-stone-800">
+                    <Button
+                      type="submit"
+                      disabled={isLtxSaving}
+                      className="rounded-lg bg-aurora-purple px-6 py-2 text-white transition-colors hover:bg-aurora-purple/90 disabled:cursor-not-allowed disabled:opacity-50"
+                    >
+                      {isLtxSaving ? tCommon('saving') : tCommon('save')}
                     </Button>
                   </div>
                 </Card>

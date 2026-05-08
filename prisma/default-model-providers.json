@@ -76,5 +76,18 @@
     "webhookRequired": false,
     "isActive": true,
     "sortOrder": 100
+  },
+  {
+    "id": 13,
+    "provider": "ltx",
+    "displayName": "LTX",
+    "adapterClass": "LtxVideoAdapter",
+    "icon": null,
+    "supportTypes": ["video"],
+    "defaultParams": null,
+    "paramSchema": null,
+    "webhookRequired": false,
+    "isActive": true,
+    "sortOrder": 100
   }
 ]

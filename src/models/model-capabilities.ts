@@ -437,6 +437,22 @@ export function buildModelCapabilities(model: AiModel, providerConfig?: ModelPro
       return withAdminOverrides(caps, model, remoteModel);
     }
 
+    if (providerKey === 'ltx') {
+      caps.operationParamKey = null;
+      caps.supports.multiImageInput = false;
+      caps.limits.maxInputImages = 1;
+      caps.operations = [
+        {
+          key: 'comfyui.ltx.i2v',
+          execution: 'async',
+          description: 'LTX 2.3 图生视频（提交远程 ComfyUI workflow，轮询 /history/{prompt_id}）。',
+          requiredParameters: ['prompt', 'referenceImages'],
+          optionalParameters: ['duration', 'style', 'adherence', 'tendency', 'seed', 'negativePrompt'],
+        },
+      ];
+      return withAdminOverrides(caps, model, remoteModel);
+    }
+
     return withAdminOverrides(caps, model, remoteModel);
   }
 

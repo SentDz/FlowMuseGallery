@@ -22,6 +22,6 @@ export class OptimizePromptDto {
 
   @IsOptional()
   @IsString()
-  @IsIn(['default', 'video_director', 'project_description', 'project_storyboard'])
-  task?: 'default' | 'video_director' | 'project_description' | 'project_storyboard';
+  @IsIn(['default', 'video_director', 'project_description', 'project_storyboard', 'project_image_prompt', 'ltx_i2v'])
+  task?: 'default' | 'video_director' | 'project_description' | 'project_storyboard' | 'project_image_prompt' | 'ltx_i2v';
 }

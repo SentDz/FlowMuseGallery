@@ -212,13 +212,26 @@
       },
       "duration": "Video Duration",
       "durations": {
+        "3": "3 seconds",
         "5": "5 seconds",
+        "8": "8 seconds",
         "10": "10 seconds",
         "15": "15 seconds"
       },
       "resolution": "Video Resolution",
       "generateAudio": "Generate Audio",
       "generateAudioHint": "Seedance 2.0 will generate matching speech, sound effects, and background music from the visuals and prompt.",
+      "ltxAdherence": "Reference Lock",
+      "ltxAdherenceOptions": {
+        "low": "Low: freer motion",
+        "medium": "Medium: balanced",
+        "high": "High: closer first frame"
+      },
+      "ltxTendency": "Result Tendency",
+      "ltxTendencyOptions": {
+        "diversity": "Diversity: more random",
+        "consistency": "Consistency: more stable"
+      },
       "switchOn": "On",
       "switchOff": "Off",
       "resolutions": {
@@ -399,6 +412,8 @@
     "wanxI2vSingleVideo": "Only 1 continuation video is supported for this combination",
     "wanxContinuationVideoRequired": "Please upload a continuation video first",
     "wanxSingleAudioOnly": "Only 1 audio file is supported for this combination",
+    "ltxFirstFrameRequired": "LTX image-to-video requires exactly 1 first-frame reference image",
+    "ltxDurationUnsupported": "LTX duration only supports 3, 5, 8, or 10 seconds",
     "referenceLimitReached": "This model supports up to {max} reference asset(s)",
     "referenceAssetsMutuallyExclusive": "You cannot select project reference assets while first/last frame input is enabled",
     "promptTooShort": "Prompt must be at least 1 character",

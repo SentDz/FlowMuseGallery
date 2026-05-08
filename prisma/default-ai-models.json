@@ -388,5 +388,32 @@
     "supportsAutoMode": false,
     "maxContextRounds": null,
     "systemPrompt": null
+  },
+  {
+    "id": 33,
+    "name": "LTX 2.3 图生视频",
+    "modelKey": "ltx-2.3-i2v",
+    "icon": null,
+    "type": "video",
+    "provider": "ltx",
+    "channelId": 12,
+    "defaultParams": {
+      "mode": "hd",
+      "style": "cinematic",
+      "adherence": "medium",
+      "tendency": "diversity"
+    },
+    "paramConstraints": null,
+    "isActive": true,
+    "sortOrder": 1,
+    "description": "通过远程 ComfyUI LTX 2.3 workflow 生成图生视频。",
+    "supportsImageInput": true,
+    "supportsResolutionSelect": false,
+    "supportsSizeSelect": false,
+    "supportsQuickMode": true,
+    "supportsAgentMode": false,
+    "supportsAutoMode": false,
+    "maxContextRounds": null,
+    "systemPrompt": null
   }
 ]

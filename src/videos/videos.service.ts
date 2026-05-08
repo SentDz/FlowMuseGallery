@@ -7,6 +7,7 @@ import { VideoGenerateParams } from '../adapters/base/base-video.adapter';
 import { PaginationDto, PaginatedResult } from '../common/dto/pagination.dto';
 import { normalizeUploadedFileName } from '../common/utils/upload-filename.util';
 import { EncryptionService } from '../encryption/encryption.service';
+import { LtxSettingsService } from '../settings/ltx-settings.service';
 import { LocalTaskRunnerService } from '../local-runner/local-task-runner.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { serializeVideoTask } from '../common/serializers/task.serializer';
@@ -81,9 +82,14 @@ export class VideosService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly encryption: EncryptionService,
+    private readonly ltxSettings: LtxSettingsService,
     private readonly storage: StorageService,
     private readonly taskRunner: LocalTaskRunnerService,
   ) {}
+
+  private isLtxProvider(provider: string) {
+    return provider.trim().toLowerCase() === 'ltx';
+  }
 
   private getUploadRules(provider: VideoInputUploadProvider) {
     return provider === 'wanx' ? WANX_UPLOAD_RULES : SEEDANCE_UPLOAD_RULES;
@@ -374,7 +380,12 @@ export class VideosService {
       if (!isFixedMediaModelId(model.id)) {
         throw new BadRequestException('个人版只支持内置固定视频模型');
       }
-      if (
+      if (this.isLtxProvider(model.provider)) {
+        const ltxSettings = await this.ltxSettings.getLtxSettings();
+        if (!ltxSettings.comfyBaseUrl.trim()) {
+          throw new BadRequestException('请先在系统配置中填写 LTX ComfyUI Base URL');
+        }
+      } else if (
         model.channel.status !== ApiChannelStatus.active ||
         !model.channel.baseUrl.trim() ||
         !model.channel.apiKey
@@ -389,6 +400,15 @@ export class VideosService {
         ...(dto.parameters && typeof dto.parameters === 'object' ? dto.parameters : {}),
         prompt: dto.prompt,
       };
+      if (dto.negativePrompt?.trim()) {
+        mergedParams.negativePrompt = dto.negativePrompt.trim();
+      }
+      if (this.isLtxProvider(model.provider)) {
+        mergedParams.mode = mergedParams.mode ?? 'hd';
+        mergedParams.style = mergedParams.style ?? 'cinematic';
+        mergedParams.adherence = mergedParams.adherence ?? 'medium';
+        mergedParams.tendency = mergedParams.tendency ?? 'diversity';
+      }
       if (model.modelKey && !(mergedParams as any).model) (mergedParams as any).model = model.modelKey;
       const normalizedParams = await this.storage.normalizeVideoGenerateParams(mergedParams);
 

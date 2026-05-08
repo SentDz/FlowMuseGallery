@@ -8,7 +8,9 @@ import { mergeTaskProviderData } from '../common/utils/task-provider-data.util';
 import { asSqliteJsonRecord, toSqliteJson } from '../common/utils/sqlite-json.util';
 import { AiModelType, ApiChannelStatus, TaskStatus } from '../common/prisma-enums';
 import { EncryptionService } from '../encryption/encryption.service';
+import { LtxSettingsService } from '../settings/ltx-settings.service';
 import { PrismaService } from '../prisma/prisma.service';
+import { PromptOptimizeService } from '../prompt-optimize/prompt-optimize.service';
 import { ProjectsService } from '../projects/projects.service';
 import { StorageService } from '../storage/storage.service';
 import { isFixedMediaModelId } from '../models/fixed-media-models';
@@ -94,7 +96,9 @@ export class LocalTaskRunnerService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly encryption: EncryptionService,
+    private readonly ltxSettings: LtxSettingsService,
     private readonly storage: StorageService,
+    private readonly promptOptimize: PromptOptimizeService,
     private readonly projects: ProjectsService,
   ) {}
 
@@ -134,6 +138,58 @@ export class LocalTaskRunnerService {
     return asSqliteJsonRecord(value) ?? {};
   }
 
+  private isFalseLike(value: unknown) {
+    if (value === false) return true;
+    if (typeof value !== 'string') return false;
+    return ['false', '0', 'off', 'disabled', 'no'].includes(value.trim().toLowerCase());
+  }
+
+  private extractLtxReferenceImage(params: Record<string, unknown>) {
+    for (const key of ['firstFrame', 'first_frame', 'firstFrameImage', 'first_frame_image', 'referenceImage', 'reference_image']) {
+      const direct = asNonEmptyString(params[key]);
+      if (direct) return direct;
+    }
+
+    const referenceImages = params.referenceImages ?? params.reference_images;
+    if (Array.isArray(referenceImages)) {
+      for (const item of referenceImages) {
+        const image = asNonEmptyString(item);
+        if (image) return image;
+      }
+      return null;
+    }
+    return asNonEmptyString(referenceImages);
+  }
+
+  private buildLtxOptimizationPrompt(params: Record<string, unknown>, prompt: string) {
+    const duration = params.duration === undefined || params.duration === null ? '5' : String(params.duration).trim() || '5';
+    const style = params.style === undefined || params.style === null ? 'cinematic' : String(params.style).trim() || 'cinematic';
+    const adherence = params.adherence === undefined || params.adherence === null ? 'medium' : String(params.adherence).trim() || 'medium';
+    return [
+      'Rewrite this image-to-video request into the best possible English positive prompt for LTX 2.3.',
+      'Use the attached/reference image as the exact first frame and preserve the visible subject, setting, lighting, colors, and camera perspective unless the user explicitly asks otherwise.',
+      `Target duration: ${duration} seconds.`,
+      `Style target: ${style}.`,
+      `Reference adherence target: ${adherence}.`,
+      'Favor a single continuous cinematic shot with clear chronological action, stable identity, coherent physics, natural motion, camera choreography, and rich but relevant visual detail.',
+      `Original user request:\n${prompt}`,
+    ].join('\n\n');
+  }
+
+  private cleanLtxOptimizedPrompt(value: unknown) {
+    if (typeof value !== 'string') return null;
+    const cleaned = value
+      .trim()
+      .replace(/^```[a-zA-Z0-9_-]*\s*/u, '')
+      .replace(/\s*```$/u, '')
+      .replace(/^(?:final\s+prompt|optimized\s+prompt|prompt)\s*[:：]\s*/iu, '')
+      .replace(/^(?:[-*]|\d+[.)])\s+/u, '')
+      .replace(/^[「"“”']+|[」"“”']+$/gu, '')
+      .replace(/\s+/g, ' ')
+      .trim();
+    return cleaned ? cleaned.slice(0, 5000) : null;
+  }
+
   private decryptChannel(channel: ApiChannel) {
     return {
       ...channel,
@@ -147,6 +203,30 @@ export class LocalTaskRunnerService {
     if (channel.status !== ApiChannelStatus.active || !channel.baseUrl.trim() || !channel.apiKey) {
       throw new Error(`请先配置 ${channel.name} 渠道的 Base URL 和 API Key`);
     }
+  }
+
+  private isLtxProvider(provider: string) {
+    return provider.trim().toLowerCase() === 'ltx';
+  }
+
+  private async resolveRunnableVideoChannel(model: { provider: string }, channel: ApiChannel) {
+    if (!this.isLtxProvider(model.provider)) {
+      this.assertRunnableChannel(channel);
+      return this.decryptChannel(channel) as any;
+    }
+
+    const settings = await this.ltxSettings.getLtxSettings();
+    if (!settings.comfyBaseUrl.trim()) {
+      throw new Error('请先在系统配置中填写 LTX ComfyUI Base URL');
+    }
+
+    return {
+      ...this.decryptChannel(channel),
+      baseUrl: settings.comfyBaseUrl.trim(),
+      apiKey: null,
+      apiSecret: null,
+      status: ApiChannelStatus.active,
+    } as any;
   }
 
   private assertRunnableMediaModel(
@@ -302,9 +382,8 @@ export class LocalTaskRunnerService {
     const channel = await this.prisma.apiChannel.findUnique({ where: { id: task.channelId } });
     if (!channel) throw new Error('Channel not found');
     this.assertRunnableMediaModel(model, AiModelType.video);
-    this.assertRunnableChannel(channel);
 
-    const adapter = AdapterFactory.createVideoAdapter(model.provider, this.decryptChannel(channel) as any);
+    const adapter = AdapterFactory.createVideoAdapter(model.provider, await this.resolveRunnableVideoChannel(model, channel));
     const params = await this.buildVideoTaskParams(task, model);
     const validation = adapter.validateParams(params);
     if (!validation.valid) {
@@ -328,7 +407,10 @@ export class LocalTaskRunnerService {
     await this.pollVideoTask(task, taskId, adapter, providerTaskId, model);
   }
 
-  private async buildVideoTaskParams(task: VideoTask, model: { defaultParams: unknown; modelKey: string }) {
+  private async buildVideoTaskParams(
+    task: VideoTask,
+    model: { defaultParams: unknown; modelKey?: string | null; provider: string },
+  ) {
     const params: VideoGenerateParams = {
       ...this.asJsonRecord(model.defaultParams),
       ...this.asJsonRecord(task.parameters),
@@ -339,7 +421,62 @@ export class LocalTaskRunnerService {
       (params as Record<string, unknown>).model = model.modelKey;
     }
 
-    return this.storage.normalizeVideoGenerateParams(params);
+    const normalized = await this.storage.normalizeVideoGenerateParams(params);
+    if (this.isLtxProvider(model.provider)) {
+      return this.enhanceLtxVideoParams(task, normalized);
+    }
+    return normalized;
+  }
+
+  private async enhanceLtxVideoParams(task: VideoTask, params: VideoGenerateParams) {
+    const enhanced = { ...params } as VideoGenerateParams;
+    const raw = enhanced as Record<string, unknown>;
+
+    raw.mode = raw.mode ?? 'hd';
+    raw.style = raw.style ?? 'cinematic';
+    raw.tendency = raw.tendency ?? 'diversity';
+    raw.adherence = raw.adherence ?? 'medium';
+
+    if (this.isFalseLike(raw.ltxPromptEnhance ?? raw.promptEnhance ?? raw.prompt_enhance)) {
+      return enhanced;
+    }
+
+    const originalPrompt = asNonEmptyString(raw.prompt) ?? task.prompt;
+    const referenceImage = this.extractLtxReferenceImage(raw);
+
+    try {
+      const optimizationInput = {
+        userId: task.userId,
+        prompt: this.buildLtxOptimizationPrompt(raw, originalPrompt),
+        images: referenceImage ? [referenceImage] : undefined,
+        modelType: 'ltx-2.3-i2v',
+        task: 'ltx_i2v' as const,
+      };
+      let result: { content: string };
+      try {
+        result = await this.promptOptimize.generateInternalPrompt(optimizationInput);
+      } catch (error: any) {
+        if (!referenceImage) throw error;
+        this.logger.warn(
+          `LTX image-aware prompt enhancement failed for task ${task.taskNo}; retrying text-only: ${error?.message ?? error}`,
+        );
+        result = await this.promptOptimize.generateInternalPrompt({
+          ...optimizationInput,
+          images: undefined,
+        });
+      }
+      const optimizedPrompt = this.cleanLtxOptimizedPrompt(result.content);
+      if (optimizedPrompt) {
+        raw.ltxOriginalPrompt = originalPrompt;
+        enhanced.prompt = optimizedPrompt;
+      }
+    } catch (error: any) {
+      this.logger.warn(
+        `LTX prompt enhancement skipped for task ${task.taskNo}: ${error?.message ?? error}`,
+      );
+    }
+
+    return enhanced;
   }
 
   private async pollVideoTask(
@@ -350,7 +487,7 @@ export class LocalTaskRunnerService {
     model: { provider: string; modelKey?: string | null },
   ) {
     let delayMs = 5_000;
-    const deadline = Date.now() + 20 * 60_000;
+    const deadline = Date.now() + (this.isLtxProvider(model.provider) ? 120 : 20) * 60_000;
 
     while (Date.now() < deadline) {
       await sleep(delayMs);
@@ -401,12 +538,16 @@ export class LocalTaskRunnerService {
     model: { provider: string; modelKey?: string | null };
   }) {
     if (!isSeedanceVideoModel(input.model)) {
-      const thumbnail = await this.storage.saveVideoLastFrameFromVideoUrl({
-        videoUrl: input.savedVideoUrl,
-        objectKey: input.savedStorageKey,
-        taskNo: input.taskNo,
-      });
-      return thumbnail.url;
+      try {
+        const thumbnail = await this.storage.saveVideoLastFrameFromVideoUrl({
+          videoUrl: input.savedVideoUrl,
+          objectKey: input.savedStorageKey,
+          taskNo: input.taskNo,
+        });
+        return thumbnail.url;
+      } catch {
+        return null;
+      }
     }
 
     const providerThumbnail = this.asJsonRecord(input.providerData).thumbnailUrl;

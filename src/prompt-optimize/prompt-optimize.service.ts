@@ -2,6 +2,7 @@ import { BadRequestException, Injectable, Logger } from '@nestjs/common';
 
 import { AiSettingsService } from '../settings/ai-settings.service';
 import {
+  LTX_I2V_PROMPT_SYSTEM_PROMPT,
   MIDJOURNEY_SYSTEM_PROMPT,
   PROJECT_DESCRIPTION_BUNDLE_SYSTEM_PROMPT,
   PROJECT_DESCRIPTION_SYSTEM_PROMPT,
@@ -16,7 +17,8 @@ type PromptOptimizeTask =
   | 'project_description'
   | 'project_description_bundle'
   | 'project_storyboard'
-  | 'project_image_prompt';
+  | 'project_image_prompt'
+  | 'ltx_i2v';
 
 type PromptRequestInput = {
   userId: bigint;
@@ -102,6 +104,9 @@ export class PromptOptimizeService {
     if (task === 'video_director') {
       return VIDEO_DIRECTOR_ASSISTANT_SYSTEM_PROMPT;
     }
+    if (task === 'ltx_i2v') {
+      return LTX_I2V_PROMPT_SYSTEM_PROMPT;
+    }
     if (task === 'project_description') {
       return PROJECT_DESCRIPTION_SYSTEM_PROMPT;
     }
@@ -178,8 +183,13 @@ export class PromptOptimizeService {
       }
       if (images?.length) {
         for (const img of images) {
-          const base64Data = img.startsWith('data:') ? img : `data:image/jpeg;base64,${img}`;
-          userContent.push({ type: 'image_url', image_url: { url: base64Data } });
+          const normalizedImage = typeof img === 'string' ? img.trim() : '';
+          if (!normalizedImage) continue;
+          const imageUrl =
+            normalizedImage.startsWith('data:') || /^https?:\/\//i.test(normalizedImage)
+              ? normalizedImage
+              : `data:image/jpeg;base64,${normalizedImage}`;
+          userContent.push({ type: 'image_url', image_url: { url: imageUrl } });
         }
       }
 

@@ -99,6 +99,7 @@ export interface VideoCreateWorkspaceProps {
   wanxVideoContinuationEnabled: boolean
   setWanxVideoContinuationEnabled: Dispatch<SetStateAction<boolean>>
   isDoubaoVideo: boolean
+  isLtxVideo: boolean
   isDoubaoSeedance20: boolean
   hasDoubaoSeedance20ReferenceInputs: boolean
   hasDoubaoSeedance20FrameInputs: boolean
@@ -127,6 +128,10 @@ export interface VideoCreateWorkspaceProps {
   seedanceSwitchClassName: string
   videoDuration: string
   setVideoDuration: Dispatch<SetStateAction<string>>
+  ltxAdherence: string
+  setLtxAdherence: Dispatch<SetStateAction<string>>
+  ltxTendency: string
+  setLtxTendency: Dispatch<SetStateAction<string>>
   videoResolution: string
   setVideoResolution: Dispatch<SetStateAction<string>>
   aspectRatio: string
@@ -224,6 +229,7 @@ export function VideoCreateWorkspace({
   wanxVideoContinuationEnabled,
   setWanxVideoContinuationEnabled,
   isDoubaoVideo,
+  isLtxVideo,
   isDoubaoSeedance20,
   hasDoubaoSeedance20ReferenceInputs,
   hasDoubaoSeedance20FrameInputs,
@@ -252,6 +258,10 @@ export function VideoCreateWorkspace({
   seedanceSwitchClassName,
   videoDuration,
   setVideoDuration,
+  ltxAdherence,
+  setLtxAdherence,
+  ltxTendency,
+  setLtxTendency,
   videoResolution,
   setVideoResolution,
   aspectRatio,
@@ -1027,7 +1037,7 @@ export function VideoCreateWorkspace({
                   </label>
                   <span className="text-xs text-muted-foreground">
                     {t('form.uploadReference.maxFiles', {
-                      max: standardVideoReferenceUploadMaxFiles,
+                      max: isLtxVideo ? 1 : standardVideoReferenceUploadMaxFiles,
                     })}
                   </span>
                 </div>
@@ -1035,7 +1045,7 @@ export function VideoCreateWorkspace({
                 <ImageDropzone
                   value={videoInputImages}
                   onChange={setVideoInputImages}
-                  maxFiles={standardVideoReferenceUploadMaxFiles}
+                  maxFiles={isLtxVideo ? 1 : standardVideoReferenceUploadMaxFiles}
                   maxSize={10}
                   accept="image/png,image/jpeg"
                   disabled={standardVideoReferenceUploadMaxFiles === 0}
@@ -1376,6 +1386,45 @@ export function VideoCreateWorkspace({
                   showPreview={false}
                 />
               </>
+            ) : isLtxVideo ? (
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-3 sm:gap-4">
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">{t('form.parameters.videoDuration')}</label>
+                  <Select
+                    value={videoDuration}
+                    onChange={(event) => setVideoDuration(event.target.value)}
+                    options={[
+                      { value: '3', label: t('form.parameters.durations.3') },
+                      { value: '5', label: t('form.parameters.durations.5') },
+                      { value: '8', label: t('form.parameters.durations.8') },
+                      { value: '10', label: t('form.parameters.durations.10') },
+                    ]}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">{t('form.parameters.ltxAdherence')}</label>
+                  <Select
+                    value={ltxAdherence}
+                    onChange={(event) => setLtxAdherence(event.target.value)}
+                    options={[
+                      { value: 'low', label: t('form.parameters.ltxAdherenceOptions.low') },
+                      { value: 'medium', label: t('form.parameters.ltxAdherenceOptions.medium') },
+                      { value: 'high', label: t('form.parameters.ltxAdherenceOptions.high') },
+                    ]}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">{t('form.parameters.ltxTendency')}</label>
+                  <Select
+                    value={ltxTendency}
+                    onChange={(event) => setLtxTendency(event.target.value)}
+                    options={[
+                      { value: 'diversity', label: t('form.parameters.ltxTendencyOptions.diversity') },
+                      { value: 'consistency', label: t('form.parameters.ltxTendencyOptions.consistency') },
+                    ]}
+                  />
+                </div>
+              </div>
             ) : (
               <>
                 <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4">

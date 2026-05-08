@@ -129,13 +129,14 @@ FlowMuse has fixed built-in media providers. Users only need to enter each provi
 | Volcengine Doubao | Image / video generation |
 | Tongyi Qianwen | Image generation |
 | Tongyi Wanxiang | Video generation |
+| LTX | Remote ComfyUI image-to-video |
 
 Built-in media models:
 
 | Type | Models |
 | --- | --- |
 | Image | NanoBanana, Nano Banana Pro, NanoBanana 2, GPT Image 2, Midjourney, Seedream 4.5, Seedream 5.0 Lite, Qwen Image 2.0 Pro, Wanxiang 2.7 Image |
-| Video | HappyHorse 1.0, Seedance 2.0, Seedance 2.0 Fast, Wanxiang 2.7 Video, Wanxiang 2.7 Text-to-Video, Wanxiang 2.7 Image-to-Video |
+| Video | HappyHorse 1.0, Seedance 2.0, Seedance 2.0 Fast, Wanxiang 2.7 Video, Wanxiang 2.7 Text-to-Video, Wanxiang 2.7 Image-to-Video, LTX 2.3 Image-to-Video |
 
 ## 💬 Chat File Uploads
 

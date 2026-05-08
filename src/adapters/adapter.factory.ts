@@ -3,6 +3,7 @@ import { ApiChannel } from '@prisma/client';
 import { DoubaoImageAdapter } from './doubao/doubao-image.adapter';
 import { DoubaoVideoAdapter } from './doubao/doubao-video.adapter';
 import { GptImageAdapter } from './gptimage/gptimage-image.adapter';
+import { LtxVideoAdapter } from './ltx/ltx-video.adapter';
 import { MidjourneyImageAdapter } from './midjourney/midjourney-image.adapter';
 import { NanobananaImageAdapter } from './nanobanana/nanobanana-image.adapter';
 import { QianwenImageAdapter } from './qianwen/qianwen-image.adapter';
@@ -30,6 +31,7 @@ export class AdapterFactory {
     ['doubao_video', DoubaoVideoAdapter],
     ['wanx', WanxVideoAdapter],
     ['wanxiang', WanxVideoAdapter],
+    ['ltx', LtxVideoAdapter],
   ]);
 
   static createImageAdapter(provider: string, channel: ApiChannel): BaseImageAdapter {

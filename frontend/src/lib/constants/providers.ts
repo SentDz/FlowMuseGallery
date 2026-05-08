@@ -14,7 +14,7 @@ export interface ProviderConfig {
   description?: string
 }
 
-const ADMIN_MODELS_HIDDEN_PROVIDER_KEYS = new Set<string>()
+const ADMIN_MODELS_HIDDEN_PROVIDER_KEYS = new Set<string>(['ltx'])
 
 function normalizeProviderKey(key: string) {
   return key.toLowerCase().trim()
@@ -67,6 +67,13 @@ export const AVAILABLE_PROVIDERS: ProviderConfig[] = [
     adapterClass: 'WanxVideoAdapter',
     supportTypes: ['video'],
     description: '阿里云百炼万相参考生视频',
+  },
+  {
+    key: 'ltx',
+    displayName: 'LTX',
+    adapterClass: 'LtxVideoAdapter',
+    supportTypes: ['video'],
+    description: '远程 ComfyUI LTX 图生视频',
   },
 ]
 

@@ -212,13 +212,26 @@
       },
       "duration": "视频时长",
       "durations": {
+        "3": "3秒",
         "5": "5秒",
+        "8": "8秒",
         "10": "10秒",
         "15": "15秒"
       },
       "resolution": "视频清晰度",
       "generateAudio": "生成声音",
       "generateAudioHint": "Seedance 2.0 会根据画面与提示词自动生成匹配的人声、音效与背景音乐。",
+      "ltxAdherence": "参考约束",
+      "ltxAdherenceOptions": {
+        "low": "低：更自由",
+        "medium": "中：平衡",
+        "high": "高：更贴首帧"
+      },
+      "ltxTendency": "结果倾向",
+      "ltxTendencyOptions": {
+        "diversity": "多样：更随机",
+        "consistency": "一致：更稳定"
+      },
       "switchOn": "已开启",
       "switchOff": "已关闭",
       "resolutions": {
@@ -399,6 +412,8 @@
     "wanxI2vSingleVideo": "当前组合最多 1 个续写视频",
     "wanxContinuationVideoRequired": "请先上传续写视频",
     "wanxSingleAudioOnly": "当前组合最多 1 个音频",
+    "ltxFirstFrameRequired": "LTX 图生视频需要且仅支持 1 张首帧参考图",
+    "ltxDurationUnsupported": "LTX 视频时长仅支持 3、5、8、10 秒",
     "referenceLimitReached": "当前模型最多支持 {max} 个参考素材",
     "referenceAssetsMutuallyExclusive": "已启用首尾帧输入时，不能再选择项目参考素材",
     "promptTooShort": "提示词至少需要 1 个字符",

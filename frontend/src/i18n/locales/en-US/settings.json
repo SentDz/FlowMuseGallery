@@ -36,6 +36,11 @@
       "region": "Region",
       "publicBaseUrl": "Public Base URL",
       "prefix": "Path Prefix"
+    },
+    "ltx": {
+      "title": "LTX ComfyUI",
+      "comfyBaseUrl": "ComfyUI Base URL",
+      "comfyBaseUrlPlaceholder": "http://your-comfyui-server:8188"
     }
   },
   "media": {

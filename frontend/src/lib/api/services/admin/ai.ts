@@ -20,6 +20,11 @@ export interface StorageSettings {
   cosConfigured: boolean
 }
 
+export interface LtxSettings {
+  comfyBaseUrl: string
+  configured: boolean
+}
+
 export interface ChatModelItem {
   id: string
   name: string
@@ -75,6 +80,14 @@ export const adminAiService = {
 
   updateStorageSettings: async (data: Partial<StorageSettings>): Promise<StorageSettings> => {
     return adminApiClient.put('/ai/storage', data)
+  },
+
+  getLtxSettings: async (): Promise<LtxSettings> => {
+    return adminApiClient.get('/ai/ltx')
+  },
+
+  updateLtxSettings: async (data: Partial<LtxSettings>): Promise<LtxSettings> => {
+    return adminApiClient.put('/ai/ltx', data)
   },
 
   listChatModels: async (): Promise<ChatModelItem[]> => {

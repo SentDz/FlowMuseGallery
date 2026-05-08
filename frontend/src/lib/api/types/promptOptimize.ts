@@ -3,6 +3,8 @@ export type PromptOptimizeTask =
   | 'video_director'
   | 'project_description'
   | 'project_storyboard'
+  | 'project_image_prompt'
+  | 'ltx_i2v'
 
 export interface OptimizePromptDto {
   prompt: string
