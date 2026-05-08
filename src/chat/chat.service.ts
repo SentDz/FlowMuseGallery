@@ -3443,6 +3443,12 @@ export class ChatService {
     if (providerKey.includes('doubao')) {
       return { image: images.length === 1 ? images[0] : images };
     }
+    if (providerKey.includes('gptimage')) {
+      return {
+        gptImageOperation: 'edits',
+        ...(images.length === 1 ? { image: images[0] } : { images }),
+      };
+    }
     if (
       providerKey.includes('nanobanana') ||
       providerKey.includes('gemini') ||

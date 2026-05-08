@@ -1,7 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import Link from '@/lib/compat/link'
 import { usePathname, useRouter } from '@/lib/router'
-import { CanvasBoardContent } from '@/components/features/canvas/CanvasBoardContent'
 import { ChatContent } from '@/components/features/chat/ChatContent'
 import { SimplifiedCreateContent } from '@/components/features/create/SimplifiedCreateContent'
 import { GalleryContent } from '@/components/features/gallery/GalleryContent'
@@ -173,14 +172,6 @@ function resolveRoute(pathname: string): RouteMatch {
       locale,
       routeKey: `${locale}:tasks`,
       element: <TasksContent />,
-    }
-  }
-
-  if (section === 'canvas' && routeSegments.length === 1) {
-    return {
-      locale,
-      routeKey: `${locale}:canvas`,
-      element: <CanvasBoardContent />,
     }
   }
 

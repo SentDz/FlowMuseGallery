@@ -15,6 +15,10 @@ import { isFixedMediaModelId } from '../models/fixed-media-models';
 
 type LocalJobState = 'waiting' | 'processing' | 'completed' | 'failed' | 'cancelled';
 
+const IMAGE_AUTO_MAX_ATTEMPTS = 3;
+const IMAGE_AUTO_MAX_RETRY_COUNT = IMAGE_AUTO_MAX_ATTEMPTS - 1;
+const IMAGE_AUTO_RETRY_DELAY_MS = 500;
+
 type TaskStateSnapshot = {
   status: string;
   errorMessage: string | null;
@@ -508,6 +512,47 @@ export class LocalTaskRunnerService {
   }
 
   private async markImageFailed(taskId: bigint, errorMessage: string, providerData?: unknown) {
+    const task = await this.prisma.imageTask.findUnique({
+      where: { id: taskId },
+      select: {
+        status: true,
+        retryCount: true,
+        deletedAt: true,
+        taskNo: true,
+      },
+    });
+
+    if (!task || task.deletedAt || task.status === TaskStatus.completed || task.status === TaskStatus.failed) {
+      return;
+    }
+
+    if (task.retryCount < IMAGE_AUTO_MAX_RETRY_COUNT) {
+      const nextRetryCount = task.retryCount + 1;
+      await this.prisma.imageTask.update({
+        where: { id: taskId },
+        data: {
+          status: TaskStatus.pending,
+          retryCount: { increment: 1 },
+          errorMessage: null,
+          providerTaskId: null,
+          providerData: null,
+          resultUrl: null,
+          thumbnailUrl: null,
+          storageKey: null,
+          startedAt: null,
+          completedAt: null,
+        },
+      });
+
+      this.logger.warn(
+        `Image task ${task.taskNo} failed; auto retry ${nextRetryCount}/${IMAGE_AUTO_MAX_RETRY_COUNT} in ${IMAGE_AUTO_RETRY_DELAY_MS}ms: ${errorMessage}`,
+      );
+
+      await sleep(IMAGE_AUTO_RETRY_DELAY_MS);
+      await this.enqueueImage(taskId, nextRetryCount);
+      return;
+    }
+
     await this.prisma.imageTask.update({
       where: { id: taskId },
       data: {

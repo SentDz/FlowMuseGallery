@@ -34,7 +34,6 @@ export function MobileTabBar() {
       href: `/${locale}/create`,
       matcher: (path: string) =>
         path.startsWith(`/${locale}/create`) ||
-        path.startsWith(`/${locale}/canvas`) ||
         path.startsWith(`/${locale}/templates`),
     },
     {

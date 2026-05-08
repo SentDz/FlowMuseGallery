@@ -41,7 +41,7 @@
 
 ## 🖼️ Screenshots
 
-FlowMuse is centered around a creation workspace. It connects the home entry, quick generation, conversational workflows, an online canvas, and task tracking into a local-first creative pipeline.
+FlowMuse is centered around a creation workspace. It connects the home entry, quick generation, conversational workflows, project assets, and task tracking into a local-first creative pipeline.
 
 ![FlowMuse Home](image/index.jpg)
 
@@ -66,7 +66,6 @@ FlowMuse is centered around a creation workspace. It connects the home entry, qu
 | Gallery | Browse completed local image and video works in a masonry layout. |
 | Quick Mode | Start image or video generation tasks directly. |
 | Workflow Mode | Use conversation to drive image agents, video storyboards, and automated creation. |
-| Online Canvas | Sketch, annotate, compose layouts, export PNGs, or save results to a project. |
 | Projects | Manage project descriptions, assets, documents, inspirations, and project-level prompts. |
 | Task Center | Review task status, failure reasons, results, and follow-up actions. |
 | Settings | Configure chat models, media providers, and optional COS storage. |
@@ -107,16 +106,6 @@ FlowMuse is centered around a creation workspace. It connects the home entry, qu
 - Generate project descriptions with AI.
 - Manage project inspirations and video storyboard prompts.
 - Maintain project-level image / video prompts for more stable style consistency.
-
-### Online Canvas
-
-![Online Canvas](image/canvas.jpg)
-
-- Freehand brush, eraser, rectangle, circle, line, text, and image import.
-- Select, drag, scale, rotate, undo, and redo.
-- Export PNG.
-- Import / export canvas JSON.
-- Save canvas results as project image assets.
 
 ### Task Center
 

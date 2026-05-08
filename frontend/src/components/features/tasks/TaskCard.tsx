@@ -9,6 +9,7 @@ import { useEffect, useRef, useState } from 'react'
 import { ExternalLink } from 'lucide-react'
 import { useTranslations } from '@/i18n/client'
 import { Button, Card } from '@/components/ui'
+import { GeneratingTaskStage } from '@/components/shared/GeneratingTaskStage'
 import { imageService, videoService } from '@/lib/api/services'
 import type { ApiTask } from '@/lib/api/types/task'
 import { cn } from '@/lib/utils/cn'
@@ -46,6 +47,8 @@ export function TaskCard({ task, onUpdate, onDelete }: TaskCardProps) {
   const isMjActionPending = pendingMjActionId !== null
   const previewImageUrl = task.thumbnailUrl || task.resultUrl || ''
   const openImageUrl = task.resultUrl || task.thumbnailUrl || ''
+  const isTaskGenerating = task.status === 'pending' || task.status === 'processing'
+  const generatingStatus = task.status === 'processing' ? 'processing' : 'pending'
   const failureReason = (() => {
     const raw = task.errorMessage?.trim()
     if (!raw) return t('failure.unknown')
@@ -457,6 +460,26 @@ export function TaskCard({ task, onUpdate, onDelete }: TaskCardProps) {
     <>
     <Card variant="glass" className="relative overflow-hidden rounded-xl p-4">
       <div className="flex flex-col h-full">
+        {isTaskGenerating && !previewImageUrl && (
+          <GeneratingTaskStage
+            kind={task.type}
+            status={generatingStatus}
+            retryCount={task.retryCount}
+            variant="full"
+            labels={{
+              statusLabel: t(`status.${task.status}`),
+              kindLabel: task.type === 'image' ? t('generating.image') : t('generating.video'),
+              title: task.status === 'processing' ? t('generating.processingTitle') : t('generating.pendingTitle'),
+              subtitle: task.status === 'processing' ? t('generating.processingSubtitle') : t('generating.pendingSubtitle'),
+              retryLabel: task.retryCount > 0 ? t('generating.retrying', { count: task.retryCount }) : undefined,
+              ariaLabel: t('generating.aria', {
+                kind: task.type === 'image' ? t('generating.image') : t('generating.video'),
+                status: t(`status.${task.status}`),
+              }),
+            }}
+          />
+        )}
+
         {/* 预览图 */}
         {task.status === 'completed' && (task.thumbnailUrl || task.resultUrl) && (
           <div className="relative w-full mb-3 rounded-lg overflow-hidden">

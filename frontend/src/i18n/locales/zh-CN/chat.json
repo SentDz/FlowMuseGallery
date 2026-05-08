@@ -86,6 +86,13 @@
       "processing": "生成中",
       "completed": "已完成",
       "failed": "失败"
+    },
+    "generating": {
+      "pendingTitle": "任务已进入创作队列",
+      "pendingSubtitle": "正在准备上下文与素材，模型就绪后会自动开始。",
+      "processingTitle": "模型正在创作画面",
+      "processingSubtitle": "正在根据这轮对话生成结果，完成后会自动替换为预览。",
+      "aria": "{kind}任务{status}"
     }
   },
   "autoMode": {

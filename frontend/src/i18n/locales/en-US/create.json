@@ -355,6 +355,14 @@
     "generating": "Creating...",
     "clear": "Clear Form"
   },
+  "batch": {
+    "title": "Batch Image Generation",
+    "countLabel": "Choose image count",
+    "countOption": "{count}",
+    "description": "Batch generation submits one task per image with a 0.5s interval between requests.",
+    "cancel": "Cancel",
+    "confirm": "Start Creating"
+  },
   "cost": {
     "label": "Local Task",
     "value": "{local}",

@@ -13,7 +13,6 @@ import {
   ClipboardList,
   Compass,
   FolderKanban,
-  PenTool,
   Sparkles,
 } from 'lucide-react'
 
@@ -177,12 +176,6 @@ export function Sidebar({ forceCollapsed: _forceCollapsed = false }: SidebarProp
             active: pathname.startsWith(`/${locale}/chat`),
           },
         ],
-      },
-      {
-        href: `/${locale}/canvas`,
-        label: t('rail.canvas'),
-        active: pathname.startsWith(`/${locale}/canvas`),
-        icon: <PenTool className="h-5 w-5 stroke-[2]" />,
       },
       {
         href: `/${locale}/projects`,

@@ -14,6 +14,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { Separator } from '@/components/ui/separator'
 import { ImageDropzone } from '@/components/ui/ImageDropzone'
 import { AspectRatioSelect } from '@/components/ui/AspectRatioSelect'
+import { Modal } from '@/components/ui/Modal'
 import {
   Sparkles,
   ImageIcon,
@@ -64,6 +65,7 @@ import {
 } from './config/aspectRatioOptions'
 
 type CreationType = 'image' | 'video'
+type ImageBatchCount = 1 | 2 | 4
 type MentionMediaKind = 'image' | 'video' | 'audio'
 type MentionMediaSource = 'upload' | 'project'
 type MentionableProjectAsset = ProjectAsset & { kind: Extract<ProjectAsset['kind'], MentionMediaKind> }
@@ -90,6 +92,13 @@ type QuickStartDragState = {
   startX: number
   scrollLeft: number
   hasMoved: boolean
+}
+
+const IMAGE_BATCH_COUNTS: ImageBatchCount[] = [1, 2, 4]
+const IMAGE_BATCH_REQUEST_INTERVAL_MS = 500
+
+function wait(ms: number) {
+  return new Promise((resolve) => window.setTimeout(resolve, ms))
 }
 
 const MENTIONED_MEDIA_PROMPT_REGEX = /@(?=(?:图|图片|视频|音频)\d+)/g
@@ -407,6 +416,8 @@ export function SimplifiedCreateContent() {
   const [wanxLastFrameImages, setWanxLastFrameImages] = useState<File[]>([])
   const [wanxVideoContinuationEnabled, setWanxVideoContinuationEnabled] = useState(false)
   const [doubaoGenerateAudio, setDoubaoGenerateAudio] = useState(true)
+  const [showImageBatchDialog, setShowImageBatchDialog] = useState(false)
+  const [imageBatchCount, setImageBatchCount] = useState<ImageBatchCount>(1)
 
   // AI 提示词优化状态
   const [isOptimizing, setIsOptimizing] = useState(false)
@@ -1884,7 +1895,7 @@ export function SimplifiedCreateContent() {
   }
 
   // 处理提交
-  const handleSubmit = async () => {
+  const handleSubmit = async (batchCount: ImageBatchCount = 1) => {
     const requestPrompt = buildRequestPrompt()
     const hasImageReferenceInputs = inputImages.length > 0 || selectedProjectImageAssets.length > 0
     const totalImageReferenceCount = inputImages.length + selectedProjectImageAssets.length
@@ -2293,13 +2304,21 @@ export function SimplifiedCreateContent() {
         parameters: Object.keys(parameters).length > 0 ? parameters : undefined,
       }
 
-      // 调用对应的生成服务
-      const createdTask =
-        activeTab === 'image'
-          ? await imageService.generate(requestData)
-          : await videoService.generate(requestData)
+      const normalizedBatchCount = activeTab === 'image' ? batchCount : 1
 
-      upsertTaskInTasksViewCache(user?.id ?? null, createdTask)
+      for (let index = 0; index < normalizedBatchCount; index += 1) {
+        if (index > 0) {
+          await wait(IMAGE_BATCH_REQUEST_INTERVAL_MS)
+        }
+
+        // 调用对应的生成服务
+        const createdTask =
+          activeTab === 'image'
+            ? await imageService.generate(requestData)
+            : await videoService.generate(requestData)
+
+        upsertTaskInTasksViewCache(user?.id ?? null, createdTask)
+      }
 
       toast.success(t('success.title'))
 
@@ -2313,6 +2332,21 @@ export function SimplifiedCreateContent() {
     } finally {
       setLoading(false)
     }
+  }
+
+  const handleGenerateClick = () => {
+    if (activeTab === 'image') {
+      setImageBatchCount(1)
+      setShowImageBatchDialog(true)
+      return
+    }
+
+    void handleSubmit(1)
+  }
+
+  const handleConfirmImageBatch = () => {
+    setShowImageBatchDialog(false)
+    void handleSubmit(imageBatchCount)
   }
 
   const requestPromptPreview = buildRequestPrompt()
@@ -2507,7 +2541,7 @@ export function SimplifiedCreateContent() {
             />
           </div>
           <Button
-            onClick={handleSubmit}
+            onClick={handleGenerateClick}
             disabled={loading || !selectedModelId || !hasRequestPrompt}
             className="h-11 w-full shrink-0 gap-1.5 rounded-[16px] bg-gradient-to-r from-aurora-purple to-aurora-pink px-4 text-white hover:opacity-90 lg:w-auto lg:min-w-[168px]"
           >
@@ -2530,6 +2564,69 @@ export function SimplifiedCreateContent() {
 
   return (
     <PageTransition className="create-page-no-edge-glow mx-auto w-full max-w-[1680px] space-y-5 bg-canvas px-4 py-5 pb-[9.75rem] text-stone-900 sm:space-y-6 sm:px-5 sm:py-6 sm:pb-[10.25rem] md:px-6 md:pb-6 lg:px-7 lg:pb-6 xl:px-8 dark:bg-canvas-dark dark:text-stone-100">
+      <Modal
+        isOpen={showImageBatchDialog}
+        onClose={() => {
+          if (!loading) {
+            setShowImageBatchDialog(false)
+          }
+        }}
+        title={t('batch.title')}
+        size="sm"
+        className="max-w-[420px]"
+      >
+        <div className="space-y-5">
+          <div className="space-y-2">
+            <p className="text-sm font-medium text-stone-900 dark:text-stone-100">
+              {t('batch.countLabel')}
+            </p>
+            <div className="grid grid-cols-3 gap-2">
+              {IMAGE_BATCH_COUNTS.map((count) => {
+                const active = imageBatchCount === count
+                return (
+                  <button
+                    key={count}
+                    type="button"
+                    onClick={() => setImageBatchCount(count)}
+                    className={cn(
+                      'flex h-12 items-center justify-center rounded-2xl border text-sm font-semibold transition-all',
+                      active
+                        ? 'border-aurora-purple bg-aurora-purple text-white shadow-sm'
+                        : 'border-stone-200 bg-white text-stone-700 hover:border-stone-300 hover:bg-stone-50 dark:border-stone-700 dark:bg-stone-900 dark:text-stone-200 dark:hover:border-stone-600 dark:hover:bg-stone-800'
+                    )}
+                  >
+                    {t('batch.countOption', { count })}
+                  </button>
+                )
+              })}
+            </div>
+          </div>
+
+          <p className="text-xs leading-5 text-stone-500 dark:text-stone-400">
+            {t('batch.description')}
+          </p>
+
+          <div className="flex justify-end gap-2 border-t border-stone-200 pt-4 dark:border-stone-800">
+            <Button
+              type="button"
+              variant="secondary"
+              onClick={() => setShowImageBatchDialog(false)}
+              disabled={loading}
+            >
+              {t('batch.cancel')}
+            </Button>
+            <Button
+              type="button"
+              onClick={handleConfirmImageBatch}
+              disabled={loading}
+              className="gap-2 bg-aurora-purple text-white hover:bg-aurora-purple-hover"
+            >
+              <Sparkles className="h-4 w-4" />
+              {t('batch.confirm')}
+            </Button>
+          </div>
+        </div>
+      </Modal>
       <Tabs className="block w-full min-w-0" value={activeTab} onValueChange={(v) => setActiveTab(v as CreationType)}>
         <FadeIn variant="slide">
           <section id="create-workbench" className="scroll-mt-28 mb-6 flex flex-col gap-4 md:mb-8 md:flex-row md:items-end md:justify-between">

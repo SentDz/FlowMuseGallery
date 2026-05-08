@@ -31,45 +31,45 @@ export interface AspectRatioOption {
 export const GPT_IMAGE_SIZE_OPTIONS: AspectRatioOption[] = [
   {
     value: '1024x1024',
-    label: '1K · 1024×1024',
-    description: '1K 正方形',
+    label: '1024×1024',
+    description: '1K / 正方形社交媒体头像、图标、标准卡片最常用默认尺寸，生成最快',
     icon: Square,
   },
   {
     value: '1536x1024',
-    label: '2K · 1536×1024',
-    description: '2K 横版',
+    label: '1536×1024',
+    description: '2K / 横向横幅、海报、演示文稿、产品展示官方推荐横向 2K',
     icon: RectangleHorizontal,
   },
   {
     value: '1024x1536',
-    label: '2K · 1024×1536',
-    description: '2K 竖版',
+    label: '1024×1536',
+    description: '2K / 纵向手机壁纸、故事、竖版海报官方推荐纵向 2K',
     icon: RectangleVertical,
   },
   {
-    value: '1792x1024',
-    label: '2K · 1792×1024',
-    description: '2K 宽屏横版',
+    value: '2048x2048',
+    label: '2048×2048',
+    description: '2K / 正方形高清正方形海报、艺术图原生 2K 正方形',
+    icon: Square,
+  },
+  {
+    value: '2048x1152',
+    label: '2048×1152',
+    description: '2K / 横向16:9 横幅、视频封面、宽屏经典 16:9 比例 2K',
     icon: RectangleHorizontal,
-  },
-  {
-    value: '1024x1792',
-    label: '2K · 1024×1792',
-    description: '2K 长图竖版',
-    icon: RectangleVertical,
-  },
-  {
-    value: '2160x3840',
-    label: '4K · 2160×3840',
-    description: '4K 竖版',
-    icon: RectangleVertical,
   },
   {
     value: '3840x2160',
-    label: '4K · 3840×2160',
-    description: '4K 横版',
+    label: '3840×2160',
+    description: '4K / 横向超高清横幅、4K 壁纸、印刷官方推荐最高规格横向',
     icon: RectangleHorizontal,
+  },
+  {
+    value: '2160x3840',
+    label: '2160×3840',
+    description: '4K / 纵向手机 4K 壁纸、竖版超清官方推荐最高规格纵向',
+    icon: RectangleVertical,
   },
 ]
 

@@ -21,6 +21,16 @@
     "completed": "已完成",
     "failed": "失败"
   },
+  "generating": {
+    "image": "图片",
+    "video": "视频",
+    "pendingTitle": "创作队列已接收",
+    "pendingSubtitle": "正在准备模型与素材，轮到它后会自动开始。",
+    "processingTitle": "模型正在生成作品",
+    "processingSubtitle": "灵感正在成片，请保持页面打开或稍后回来查看结果。",
+    "retrying": "生成遇到波动，正在自动重试第 {count} 次。",
+    "aria": "{kind}任务{status}"
+  },
   "info": {
     "type": "类型",
     "model": "模型",

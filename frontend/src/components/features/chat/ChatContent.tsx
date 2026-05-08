@@ -36,6 +36,7 @@ import {
 import { toast } from 'sonner'
 
 import { PageTransition } from '@/components/shared/PageTransition'
+import { GeneratingTaskStage } from '@/components/shared/GeneratingTaskStage'
 import { Button } from '@/components/ui/Button'
 import { EnhancedSelect, type EnhancedSelectOption } from '@/components/ui/EnhancedSelect'
 import { Modal } from '@/components/ui/Modal'
@@ -4744,6 +4745,17 @@ export function ChatContent({ initialConversationId }: ChatContentProps) {
                             {message.taskRefs.map((taskRef) => {
                               const taskKey = `${taskRef.kind}:${taskRef.taskId}`
                               const isCancellingTask = cancellingTaskKeys.includes(taskKey)
+                              const isTaskGenerating =
+                                taskRef.status === 'pending' || taskRef.status === 'processing'
+                              const hasTaskPreview = Boolean(taskRef.resultUrl || taskRef.thumbnailUrl)
+                              const taskStatusLabel =
+                                taskRef.status === 'completed'
+                                  ? t('imageMode.status.completed')
+                                  : taskRef.status === 'failed'
+                                    ? t('imageMode.status.failed')
+                                    : taskRef.status === 'processing'
+                                      ? t('imageMode.status.processing')
+                                      : t('imageMode.status.pending')
                               const showCancelTaskButton =
                                 taskRef.kind === 'video' &&
                                 taskRef.cancelSupported === true &&
@@ -4773,15 +4785,47 @@ export function ChatContent({ initialConversationId }: ChatContentProps) {
                                           styles.taskCardStatusRunning
                                       )}
                                     >
-                                      {taskRef.status === 'completed'
-                                        ? t('imageMode.status.completed')
-                                        : taskRef.status === 'failed'
-                                          ? t('imageMode.status.failed')
-                                          : taskRef.status === 'processing'
-                                            ? t('imageMode.status.processing')
-                                            : t('imageMode.status.pending')}
+                                      {taskStatusLabel}
                                     </span>
                                   </div>
+
+                                  {isTaskGenerating && !hasTaskPreview ? (
+                                    <GeneratingTaskStage
+                                      kind={taskRef.kind}
+                                      status={taskRef.status === 'processing' ? 'processing' : 'pending'}
+                                      variant="compact"
+                                      labels={{
+                                        statusLabel: taskStatusLabel,
+                                        kindLabel:
+                                          taskRef.kind === 'video'
+                                            ? isZh
+                                              ? '视频'
+                                              : 'Video'
+                                            : isZh
+                                              ? '图片'
+                                              : 'Image',
+                                        title:
+                                          taskRef.status === 'processing'
+                                            ? t('imageMode.generating.processingTitle')
+                                            : t('imageMode.generating.pendingTitle'),
+                                        subtitle:
+                                          taskRef.status === 'processing'
+                                            ? t('imageMode.generating.processingSubtitle')
+                                            : t('imageMode.generating.pendingSubtitle'),
+                                        ariaLabel: t('imageMode.generating.aria', {
+                                          kind:
+                                            taskRef.kind === 'video'
+                                              ? isZh
+                                                ? '视频'
+                                                : 'Video'
+                                              : isZh
+                                                ? '图片'
+                                                : 'Image',
+                                          status: taskStatusLabel,
+                                        }),
+                                      }}
+                                    />
+                                  ) : null}
 
                                   {taskRef.kind === 'video' && taskRef.resultUrl ? (
                                     <video

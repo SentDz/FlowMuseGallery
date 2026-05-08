@@ -86,6 +86,13 @@
       "processing": "Running",
       "completed": "Completed",
       "failed": "Failed"
+    },
+    "generating": {
+      "pendingTitle": "Task entered the creative queue",
+      "pendingSubtitle": "Preparing context and assets. The model will start when ready.",
+      "processingTitle": "The model is composing the frame",
+      "processingSubtitle": "Generating from this conversation. The preview will appear here when finished.",
+      "aria": "{kind} task {status}"
     }
   },
   "autoMode": {

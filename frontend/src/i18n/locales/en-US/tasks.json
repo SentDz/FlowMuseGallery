@@ -21,6 +21,16 @@
     "completed": "Completed",
     "failed": "Failed"
   },
+  "generating": {
+    "image": "Image",
+    "video": "Video",
+    "pendingTitle": "Creative queue received",
+    "pendingSubtitle": "Preparing the model and source assets. It will start automatically when ready.",
+    "processingTitle": "The model is creating your work",
+    "processingSubtitle": "Your idea is being rendered. Keep this page open or come back later for the result.",
+    "retrying": "Generation hit a temporary issue. Auto retry {count} is running.",
+    "aria": "{kind} task {status}"
+  },
   "info": {
     "type": "Type",
     "model": "Model",

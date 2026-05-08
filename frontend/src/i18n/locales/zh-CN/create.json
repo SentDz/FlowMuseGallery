@@ -355,6 +355,14 @@
     "generating": "创作中...",
     "clear": "清空表单"
   },
+  "batch": {
+    "title": "批量出图",
+    "countLabel": "选择出图张数",
+    "countOption": "{count} 张",
+    "description": "批量生成会按所选张数连续提交任务，多次请求之间间隔 0.5 秒。",
+    "cancel": "取消",
+    "confirm": "开始创作"
+  },
   "cost": {
     "label": "本地任务",
     "value": "{local}",
